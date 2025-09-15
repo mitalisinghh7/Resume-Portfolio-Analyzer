@@ -1,2 +1,2 @@
 # main.py
-print("🎓 Welcome to Resume & Portfolio Analyzer!")
+print("🎓 Welcome to Resume & Portfolio Analyzer!"
