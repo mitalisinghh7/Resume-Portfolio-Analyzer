@@ -1,6 +1,28 @@
-# Resume-Portfolio-Analyzer
-This project is part of my participation in the **#Codeunia60DaysOfCode** challenge. I’ll be building and improving this step by step over the next 60 days.
+# 🎓 Resume & Portfolio Analyzer  
 
-## About the Project
-A Python project to help students improve their resumes and portfolios.  
-Upload your resume (PDF/DOCX) or portfolio link and get instant feedback with suggestions.
+This project is part of my participation in the **#Codeunia60DaysOfCode** challenge. I’ll be building and improving it step by step over the next 60 days.  
+
+## 📌 About the Project  
+Students and early professionals often struggle to know whether their resumes and portfolios highlight their skills effectively. This project aims to make that easier by analyzing resumes (PDF/DOCX) and portfolio links, then providing instant, actionable feedback.
+
+## 🚀 Planned Features
+- 📂 Resume Upload (PDF/DOCX)  
+- 🔑 Keyword Analysis (check for important tech skills)  
+- 📊 ATS Score Simulation (compare against job descriptions)  
+- 🌐 Portfolio Analysis (GitHub/LinkedIn scraping)  
+- 📝 Feedback Report with suggestions & missing sections  
+- ☁️ Word Cloud of strengths  
+- 📑 Export as PDF report    
+
+## 🛠️ Tech Stack
+- Python  
+- PyPDF2 / python-docx  
+- NLTK / spaCy for text analysis  
+- SQLite for storing feedback history  
+- Streamlit (for dashboard & reports)  
+
+---
+
+## 📅 Progress
+✅ Day 1: Project initialized & README created  
+🔄 To be updated daily as part of the 60 days challenge
