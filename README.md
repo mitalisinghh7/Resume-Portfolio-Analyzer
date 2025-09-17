@@ -23,6 +23,7 @@ Students and early professionals often struggle to know whether their resumes an
 
 ---
 
-## 📅 Progress
-✅ Day 1: Project initialized & README created  
-🔄 To be updated daily as part of the 60 days challenge
+## 🚀 Challenge Participation
+This repository is created for the **#Codeunia60DaysOfCode challenge**.  
+- Daily commits will include new features, improvements, or bug fixes.  
+- Progress will be shared daily on LinkedIn with the hashtag **#Codeunia60DaysOfCode**.
