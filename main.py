@@ -1,17 +1,16 @@
 from modules.resume_parser import extract_text_from_pdf, extract_text_from_docx
+from modules.keyword_analysis import analyze_keywords
 
-print("🎓 Welcome to Resume & Portfolio Analyzer!")
+pdf_path = "data/resumes/sample_resume.pdf"
+docx_path = "data/resumes/sample_resume.docx"
 
-# Example resumes for testing
-pdf_resume = "data/resumes/sample_resume.pdf"
-docx_resume = "data/resumes/sample_resume.docx"
+resume_text = extract_text_from_pdf(pdf_path)
 
-try:
-    print("\n📄 Extracted text from PDF:")
-    print(extract_text_from_pdf(pdf_resume))
+keywords = ["Python", "Java", "SQL", "Machine Learning", "Django", "MERN"]
 
-    print("\n📄 Extracted text from DOCX:")
-    print(extract_text_from_docx(docx_resume))
+# Run keyword analysis
+result = analyze_keywords(resume_text, keywords)
 
-except FileNotFoundError:
-    print("⚠️ Please add sample resumes inside data/resumes/ folder to test this feature.")
+# Print output
+print("✅ Keywords Found:", result["found"])
+print("❌ Keywords Missing:", result["missing"])
