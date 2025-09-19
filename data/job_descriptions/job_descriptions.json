@@ -1,0 +1,5 @@
+{
+  "Software Engineer": ["Python", "SQL", "Machine Learning", "Django"],
+  "Data Analyst": ["Excel", "SQL", "Python", "Data Visualization"],
+  "Web Developer": ["HTML", "CSS", "JavaScript", "React", "MERN"]
+}
