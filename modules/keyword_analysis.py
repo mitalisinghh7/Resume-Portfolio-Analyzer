@@ -15,4 +15,4 @@ def analyze_keywords(resume_text, keywords):
 
     return {
         "found": found,
-        "missing": missing
+        "missing": missing}
