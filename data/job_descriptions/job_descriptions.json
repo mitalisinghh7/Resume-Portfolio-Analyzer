@@ -1,5 +1,7 @@
 {
   "Software Engineer": ["Python", "SQL", "Machine Learning", "Django"],
   "Data Analyst": ["Excel", "SQL", "Python", "Data Visualization"],
-  "Web Developer": ["HTML", "CSS", "JavaScript", "React", "MERN"]
+  "Web Developer": ["HTML", "CSS", "JavaScript", "React", "MERN"],
+  "AI/ML Engineer": ["Python", "TensorFlow", "PyTorch", "Machine Learning", "Deep Learning"],
+  "Backend Developer": ["Python", "Django", "Flask", "Databases", "APIs"]
 }
