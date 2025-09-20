@@ -18,11 +18,11 @@ else:
 keywords = ["Python", "Java", "SQL", "Machine Learning", "Django", "MERN"]
 result = analyze_keywords(resume_text, keywords)
 
-print("\n Keyword Analysis")
-print("Keywords Found:", result["found"])
-print("Keywords Missing:", result["missing"])
+print("\n🔎 Keyword Analysis")
+print("✅ Keywords Found:", result["found"])
+print("❌ Keywords Missing:", result["missing"])
 
-print("\n ATS Scores by Job Role")
+print("\n📊 ATS Scores by Job Role")
 scores = get_all_scores(resume_text)
 for job, score in scores.items():
     print(f"- {job}: {score}%")
