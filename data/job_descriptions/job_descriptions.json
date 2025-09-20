@@ -1,7 +1,7 @@
 {
-  "Software Engineer": ["Python", "SQL", "Machine Learning", "Django"],
-  "Data Analyst": ["Excel", "SQL", "Python", "Data Visualization"],
-  "Web Developer": ["HTML", "CSS", "JavaScript", "React", "MERN"],
-  "AI/ML Engineer": ["Python", "TensorFlow", "PyTorch", "Machine Learning", "Deep Learning"],
-  "Backend Developer": ["Python", "Django", "Flask", "Databases", "APIs"]
+  "Python Developer": ["Python", "Django", "Flask", "SQL", "APIs"],
+  "Java Developer": ["Java", "Spring Boot", "Hibernate", "Microservices", "SQL"],
+  "Data Scientist": ["Python", "Machine Learning", "Pandas", "Numpy", "SQL", "Deep Learning"],
+  "Full Stack Developer": ["JavaScript", "React", "Node.js", "MongoDB", "Express", "MERN"],
+  "Machine Learning Engineer": ["Python", "TensorFlow", "Scikit-learn", "Machine Learning", "Deep Learning"]
 }
