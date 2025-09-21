@@ -29,7 +29,7 @@ for job, score in scores.items():
     print(f"- {job}: {score}%")
 
 print("\n🌐 Portfolio Analysis (GitHub)")
-github_username = "mitalisinghh7"
+github_username = input("Enter GitHub username: ")
 github_stats = analyze_github_profile(github_username)
 
 if "error" in github_stats:
