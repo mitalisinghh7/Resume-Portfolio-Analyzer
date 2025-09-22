@@ -3,34 +3,30 @@ from bs4 import BeautifulSoup
 
 def analyze_github_profile(username):
     """
-    Get GitHub profile stats:
-    - Number of repositories
+    Analyze GitHub profile:
+    - Repositories
     - Followers
-    - Contributions in the last year
+    - Contributions (this year)
     """
-    url = f"https://github.com/{username}"
-    response = requests.get(url)
+    profile_url = f"https://github.com/{username}"
+    contrib_url = f"https://github.com/users/{username}/contributions"
 
-    if response.status_code != 200:
+    profile_res = requests.get(profile_url)
+    contrib_res = requests.get(contrib_url)
+
+    if profile_res.status_code != 200:
         return {"error": f"Could not fetch profile for {username}"}
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(profile_res.text, "html.parser")
+    contrib_soup = BeautifulSoup(contrib_res.text, "html.parser")
 
-    # repositories
-    repo_tag = soup.find("span", {"class": "Counter"})
-    repos = repo_tag.text.strip() if repo_tag else "0"
-
-    # followers
-    followers_tag = soup.find("a", {"href": f"/{username}?tab=followers"})
-    followers = followers_tag.text.strip() if followers_tag else "0"
-
-    # contributions
-    contrib_tag = soup.find("h2", string=lambda text: text and "contributions" in text)
-    contrib = contrib_tag.text.strip().split(" ")[0] if contrib_tag else "0"
+    repos = soup.find("span", {"class": "Counter"})
+    followers = soup.find("a", {"href": f"/{username}?tab=followers"})
+    contribs = contrib_soup.find("h2")
 
     return {
         "username": username,
-        "repositories": repos,
-        "followers": followers,
-        "contributions": contrib
+        "repositories": repos.text.strip() if repos else "0",
+        "followers": followers.text.strip() if followers else "0",
+        "contributions": contribs.text.strip().split(" ")[0] if contribs else "0"
     }
