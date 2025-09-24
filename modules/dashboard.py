@@ -1,21 +1,25 @@
 import streamlit as st
+from resume_parser import extract_text_from_pdf, extract_text_from_docx
 
-def run_dashboard():
-    st.title("🎓 Resume & Portfolio Analyzer")
-    st.write("Welcome! This is the starting point of our dashboard.")
+st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 
-    st.header("📄 Resume Analysis")
-    st.success("✅ Keywords Found: ['Python', 'SQL']")
-    st.error("❌ Keywords Missing: ['Django', 'MERN']")
+st.title("🎓 Resume & Portfolio Analyzer")
+st.write("Welcome! Upload your resume to get started.")
 
-    st.header("📊 ATS Score")
-    st.info("Python Developer: 75%")
-    st.info("Data Scientist: 60%")
+uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 
-    st.header("🌐 Portfolio Analysis")
-    st.warning("GitHub Repositories: 10")
-    st.warning("Followers: 5")
-    st.warning("Contributions: 50 this year")
+resume_text = ""
 
-if __name__ == "__main__":
-    run_dashboard()
+if uploaded_file is not None:
+    file_type = uploaded_file.name.split(".")[-1].lower()
+
+    if file_type == "pdf":
+        resume_text = extract_text_from_pdf(uploaded_file)
+    elif file_type == "docx":
+        resume_text = extract_text_from_docx(uploaded_file)
+    else:
+        st.error("Unsupported file type!")
+
+    if resume_text:
+        st.subheader("📄 Extracted Resume Text (Preview)")
+        st.text_area("Here’s the extracted text:", resume_text[:1000], height=300)
