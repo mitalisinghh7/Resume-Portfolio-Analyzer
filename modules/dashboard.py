@@ -1,7 +1,8 @@
 import streamlit as st
 from resume_parser import extract_text_from_pdf, extract_text_from_docx
 from keyword_analysis import analyze_keywords
-from feedback import generate_feedback   # ✅ new import
+from feedback import generate_feedback
+from ui_helpers import display_resume_preview, display_keyword_analysis, display_feedback, show_summary
 
 st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 
@@ -23,16 +24,13 @@ if uploaded_file is not None:
         st.error("Unsupported file type!")
 
     if resume_text:
-        st.subheader("📄 Extracted Resume Text (Preview)")
-        st.text_area("Here’s the extracted text:", resume_text, height=300)
+        display_resume_preview(resume_text)
 
         keywords = ["Python", "Java", "SQL", "Machine Learning", "Django", "MERN"]
         result = analyze_keywords(resume_text, keywords)
+        display_keyword_analysis(result)
 
-        st.subheader("🔎 Keyword Analysis")
-        st.markdown(f"✅ **Found Keywords:** {', '.join(result['found']) if result['found'] else 'None'}")
-        st.markdown(f"❌ **Missing Keywords:** {', '.join(result['missing']) if result['missing'] else 'None'}")
-
-        st.subheader("📝 Resume Feedback")
         feedback = generate_feedback(result["found"], result["missing"])
-        st.text(feedback)
+        display_feedback(feedback)
+
+        show_summary(result)
