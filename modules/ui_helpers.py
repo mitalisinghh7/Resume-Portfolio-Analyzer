@@ -25,3 +25,12 @@ def show_summary(result: dict):
     st.subheader("📊 Skills Summary")
     st.write(f"- Found: {len(result['found'])}")
     st.write(f"- Missing: {len(result['missing'])}")
+
+def display_score(result: dict):
+    """Show a score based on found vs total keywords."""
+    total = len(result['found']) + len(result['missing'])
+    score = (len(result['found']) / total) * 100 if total > 0 else 0
+
+    st.subheader("⭐ Resume Score")
+    st.progress(int(score))
+    st.write(f"Your resume scored **{int(score)} / 100** based on keyword coverage.")
