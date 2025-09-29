@@ -18,7 +18,7 @@ def display_keyword_analysis(result: dict):
 def display_feedback(feedback: str):
     """Show resume feedback based on keyword analysis."""
     st.subheader("📝 Resume Feedback")
-    st.text(feedback)
+    st.markdown(feedback)
 
 def show_summary(result: dict):
     """Show a summary of found vs missing skills."""
