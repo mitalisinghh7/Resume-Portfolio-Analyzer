@@ -2,7 +2,7 @@ import streamlit as st
 from resume_parser import extract_text_from_pdf, extract_text_from_docx
 from keyword_analysis import analyze_keywords
 from feedback import generate_feedback
-from ui_helpers import display_resume_preview, display_keyword_analysis, display_feedback, show_summary, display_score
+from ui_helpers import load_job_roles, select_job_role, display_resume_preview, display_keyword_analysis, display_feedback, show_summary, display_score
 
 st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 
@@ -26,13 +26,17 @@ if uploaded_file is not None:
     if resume_text:
         display_resume_preview(resume_text)
 
-        keywords = ["Python", "Java", "SQL", "Machine Learning", "Django", "MERN"]
-        result = analyze_keywords(resume_text, keywords)
+        job_roles = load_job_roles("job_descriptions.json")
 
-        display_keyword_analysis(result)
+        if job_roles:
+            selected_role, keywords = select_job_role(job_roles)
 
-        feedback = generate_feedback(result["found"], result["missing"])
-        display_feedback(feedback)
+            result = analyze_keywords(resume_text, keywords)
 
-        show_summary(result)
-        display_score(result)
+            display_keyword_analysis(result)
+
+            feedback = generate_feedback(result["found"], result["missing"])
+            display_feedback(feedback)
+
+            show_summary(result)
+            display_score(result)
