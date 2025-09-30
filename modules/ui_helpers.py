@@ -1,4 +1,20 @@
 import streamlit as st
+import json
+
+def load_job_roles(json_file="job_descriptions.json"):
+    """Load job roles and their keywords from a JSON file."""
+    try:
+        with open(json_file, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        st.error("⚠️ Job descriptions file not found!")
+        return {}
+
+def select_job_role(job_roles: dict):
+    """Show a dropdown to select a job role and return its keywords."""
+    st.subheader("💼 Select Job Role for Analysis")
+    role = st.selectbox("Choose a job role:", list(job_roles.keys()))
+    return role, job_roles[role]
 
 def display_resume_preview(resume_text: str):
     """Show extracted resume text in a scrollable box."""
