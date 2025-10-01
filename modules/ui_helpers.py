@@ -1,10 +1,14 @@
 import streamlit as st
 import json
+import os
 
 def load_job_roles(json_file="job_descriptions.json"):
     """Load job roles and their keywords from a JSON file."""
     try:
-        with open(json_file, "r") as f:
+        base_dir = os.path.dirname(__file__)
+        file_path = os.path.join(base_dir, json_file)
+
+        with open(file_path, "r") as f:
             return json.load(f)
     except FileNotFoundError:
         st.error("⚠️ Job descriptions file not found!")
