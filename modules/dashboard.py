@@ -24,7 +24,8 @@ if uploaded_file is not None:
         st.error("Unsupported file type!")
 
     if resume_text:
-        display_resume_preview(resume_text)
+        st.subheader("📄 Extracted Resume Text (Preview)")
+        st.markdown(f"```\n{resume_text}\n```")
 
         job_roles = load_job_roles()
         if job_roles:
