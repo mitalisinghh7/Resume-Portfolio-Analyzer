@@ -2,7 +2,13 @@ import streamlit as st
 from resume_parser import extract_text_from_pdf, extract_text_from_docx
 from keyword_analysis import analyze_keywords
 from feedback import generate_feedback
-from ui_helpers import display_resume_preview, display_keyword_analysis, display_feedback, show_summary, display_score, load_job_roles, select_job_role
+from ui_helpers import (display_resume_preview,
+    display_keyword_analysis,
+    display_feedback,
+    show_summary,
+    display_score,
+    load_job_roles,
+    select_job_role,)
 
 st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 
@@ -36,6 +42,7 @@ if uploaded_file is not None:
 
             display_keyword_analysis(result)
 
+            st.subheader("📝 Personalized Feedback")
             feedback = generate_feedback(result["found"], result["missing"])
             display_feedback(feedback)
 
