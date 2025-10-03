@@ -1,25 +1,33 @@
-def generate_feedback(found, missing):
-    """Generate personalized resume improvement feedback."""
+import json
+import os
 
+def load_templates():
+    """Load feedback suggestions from JSON file."""
+    path = os.path.join(os.path.dirname(__file__), "feedback_templates.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+TEMPLATES = load_templates()
+
+def generate_feedback(found, missing):
+    """Generate personalized resume improvement feedback using templates."""
     feedback = []
 
     if missing:
-        feedback.append("⚠️ Consider learning or adding these skills to strengthen your resume:")
+        feedback.append("⚠️ Consider improving your resume with these:")
         for skill in missing:
-            if skill.lower() == "sql":
-                feedback.append("- SQL → Mention database projects or coursework.")
-            elif skill.lower() == "machine learning":
-                feedback.append("- Machine Learning → Add academic projects or Kaggle experience.")
-            elif skill.lower() == "mern":
-                feedback.append("- MERN → Highlight web development experience if you have it.")
-            else:
-                feedback.append(f"- {skill}")
+            suggestion = TEMPLATES.get(skill.lower(), f"Add more details about {skill}.")
+            feedback.append(f"- {skill} → {suggestion}")
     else:
-        feedback.append("✅ Excellent! Your resume already includes all key skills.")
+        feedback.append("✅ Great! Your resume already includes all the key skills for this role.")
 
     if found:
-        feedback.append("\n💡 Make sure these skills stand out clearly in your resume:")
+        feedback.append("\n💡 Make these skills stand out more:")
         for skill in found:
-            feedback.append(f"- {skill} → Highlight projects or achievements where you applied this.")
+            suggestion = TEMPLATES.get(skill.lower(), f"Show projects where you applied {skill}.")
+            feedback.append(f"- {skill} → {suggestion}")
 
     return "\n".join(feedback)
