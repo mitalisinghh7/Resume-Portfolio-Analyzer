@@ -2,13 +2,16 @@ import streamlit as st
 from resume_parser import extract_text_from_pdf, extract_text_from_docx
 from keyword_analysis import analyze_keywords
 from feedback import generate_feedback
-from ui_helpers import (display_resume_preview,
+from ats_score import calculate_ats_score, load_job_descriptions
+from ui_helpers import (
+    display_resume_preview,
     display_keyword_analysis,
     display_feedback,
     show_summary,
     display_score,
     load_job_roles,
-    select_job_role,)
+    select_job_role,
+)
 
 st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 
@@ -43,8 +46,20 @@ if uploaded_file is not None:
             display_keyword_analysis(result)
 
             st.subheader("📝 Personalized Feedback")
-            feedback = generate_feedback(result["found"], result["missing"])
-            display_feedback(feedback)
+            job_data = load_job_descriptions()
+            keywords = job_data.get(role, [])
+
+            found = [kw for kw in keywords if kw.lower() in resume_text.lower()]
+            missing = [kw for kw in keywords if kw.lower() not in resume_text.lower()]
+
+            feedback = generate_feedback(found, missing)
+            if feedback:
+                st.write(feedback)
+            else:
+                st.write("✅ Great job! Your resume covers most of the important keywords.")
 
             show_summary(result)
-            display_score(result)
+
+            ats_score = calculate_ats_score(resume_text, role)
+            st.subheader("📊 ATS Score")
+            st.write(f"⭐ Your resume scored **{ats_score}/100** based on keyword coverage.")
