@@ -1,20 +1,43 @@
 import json
 import os
 
+DEFAULT_JOB_DATA = {
+    "Python Developer": ["Python", "Django", "Flask", "SQL", "APIs"],
+    "Java Developer": ["Java", "Spring Boot", "Hibernate", "Microservices", "SQL"],
+    "Data Scientist": ["Python", "Machine Learning", "Pandas", "Numpy", "SQL", "Deep Learning"],
+    "Full Stack Developer": ["JavaScript", "React", "Node.js", "MongoDB", "Express", "MERN"],
+    "Machine Learning Engineer": ["Python", "TensorFlow", "Scikit-learn", "Machine Learning", "Deep Learning"]
+}
+
 def load_job_descriptions():
-    """Load job descriptions JSON using project root path."""
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    file_path = os.path.join(base_dir, "data", "job_descriptions", "job_descriptions.json")
 
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"Job descriptions file not found at: {file_path}")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        job_data = json.load(f)
-    return job_data
+    candidates = [
+        os.path.join(current_dir, "job_descriptions.json"),
+        os.path.join(current_dir, "data", "job_descriptions.json"),
+        os.path.join(current_dir, "data", "job_descriptions", "job_descriptions.json"),
+        os.path.join(os.path.dirname(current_dir), "data", "job_descriptions", "job_descriptions.json"),
+        os.path.join(os.path.dirname(current_dir), "job_descriptions.json"),]
+
+    for p in candidates:
+        p = os.path.normpath(p)
+        if os.path.exists(p):
+            with open(p, "r", encoding="utf-8") as f:
+                try:
+                    return json.load(f)
+                except Exception:
+                    pass
+
+    target = os.path.join(current_dir, "job_descriptions.json")
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    with open(target, "w", encoding="utf-8") as f:
+        json.dump(DEFAULT_JOB_DATA, f, indent=4)
+
+    return DEFAULT_JOB_DATA
 
 def calculate_ats_score(resume_text, job_title):
-    """Calculate ATS score for a specific job role."""
+    """Calculate ATS score for a specific job role (0-100)."""
     job_data = load_job_descriptions()
     keywords = job_data.get(job_title, [])
     if not keywords:
@@ -24,7 +47,6 @@ def calculate_ats_score(resume_text, job_title):
     return round(score, 2)
 
 def get_all_scores(resume_text):
-    """Get ATS scores for all roles."""
     job_data = load_job_descriptions()
     scores = {}
     for job in job_data:
