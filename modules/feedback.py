@@ -2,7 +2,6 @@ import json
 import os
 
 def load_templates():
-    """Load feedback suggestions from JSON file."""
     path = os.path.join(os.path.dirname(__file__), "feedback_templates.json")
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -13,21 +12,22 @@ def load_templates():
 TEMPLATES = load_templates()
 
 def generate_feedback(found, missing):
-    """Generate personalized resume improvement feedback using templates."""
-    feedback = []
+    feedback_sections = []
 
     if missing:
-        feedback.append("⚠️ Consider improving your resume with these:")
+        missing_lines = ["⚠️ **Consider improving your resume with these:**"]
         for skill in missing:
-            suggestion = TEMPLATES.get(skill.lower(), f"Add more details about {skill}.")
-            feedback.append(f"- {skill} → {suggestion}")
+            suggestion = TEMPLATES.get(skill.lower(), f"Add more details about **{skill}**.")
+            missing_lines.append(f"- {skill} → {suggestion}")
+        feedback_sections.append("\n".join(missing_lines))
     else:
-        feedback.append("✅ Great! Your resume already includes all the key skills for this role.")
+        feedback_sections.append("✅ Great! Your resume already includes all key skills for this role.")
 
     if found:
-        feedback.append("\n💡 Make these skills stand out more:")
+        found_lines = ["💡 **Make these skills stand out more:**"]
         for skill in found:
-            suggestion = TEMPLATES.get(skill.lower(), f"Show projects where you applied {skill}.")
-            feedback.append(f"- {skill} → {suggestion}")
+            suggestion = TEMPLATES.get(skill.lower(), f"Show achievements, projects, or certifications where you applied **{skill}**.")
+            found_lines.append(f"- {skill} → {suggestion}")
+        feedback_sections.append("\n".join(found_lines))
 
-    return "\n".join(feedback)
+    return "\n\n".join(feedback_sections)
