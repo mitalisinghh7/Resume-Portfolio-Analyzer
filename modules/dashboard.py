@@ -6,6 +6,7 @@ from ats_score import calculate_ats_score
 from ui_helpers import (display_resume_preview, display_keyword_analysis, display_feedback, show_summary, load_job_roles, select_job_role,
                         )
 from report_generator import generate_pdf_report
+from portfolio_analyzer import analyze_github_profile
 
 st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 
@@ -45,14 +46,14 @@ if uploaded_file is not None:
 
             show_summary(result)
 
-            # display ATS score
+            # ATS score
             try:
                 ats_score = calculate_ats_score(resume_text, role)
                 st.subheader("📊 ATS Score")
                 st.progress(int(ats_score))
                 st.write(f"⭐ Your resume scored **{ats_score}/100** for the role: **{role}**")
 
-                #  PDF Export
+                # PDF Export
                 if st.button("📄 Download PDF Report"):
                     with st.spinner("Generating PDF report..."):
                         pdf_path = generate_pdf_report(role, found, missing, feedback, ats_score)
@@ -63,6 +64,41 @@ if uploaded_file is not None:
                                 file_name=pdf_path,
                                 mime="application/pdf"
                             )
-
             except Exception as e:
                 st.error(f"Could not compute ATS score: {e}")
+
+st.markdown("---")
+st.subheader("🌐 Portfolio Analysis (GitHub)")
+
+github_username = st.text_input("Enter your GitHub username:")
+
+if github_username:
+    with st.spinner("Analyzing GitHub profile..."):
+        data = analyze_github_profile(github_username)
+
+        if "error" in data:
+            st.error(data["error"])
+        else:
+            st.success(f"✅ GitHub Profile: @{data['username']}")
+            st.write(f"**📦 Repositories:** {data['repositories']}")
+            st.write(f"**👥 Followers:** {data['followers']}")
+            st.write(f"**🔥 Contributions (this year):** {data['contributions']}")
+
+            # Quick portfolio feedback
+            st.markdown("### 💬 Portfolio Feedback")
+            feedback_lines = []
+            try:
+                if int(data['repositories']) < 5:
+                    feedback_lines.append("Add more repositories to showcase your work.")
+                if int(data['contributions']) < 100:
+                    feedback_lines.append("Increase activity — consistent commits show learning progress.")
+                if int(data['followers']) < 10:
+                    feedback_lines.append("Engage with the community more to build visibility.")
+            except ValueError:
+                feedback_lines.append("Some GitHub stats couldn’t be parsed correctly.")
+
+            if feedback_lines:
+                for line in feedback_lines:
+                    st.write(f"- {line}")
+            else:
+                st.write("Your GitHub profile looks strong — keep contributing regularly! 💪")
