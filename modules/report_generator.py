@@ -1,5 +1,5 @@
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from datetime import datetime
@@ -14,7 +14,7 @@ def generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_dat
         'Header',
         parent=styles['Heading1'],
         textColor=colors.darkblue,
-        spaceAfter=10
+        spaceAfter=12
     )
 
     subheader_style = ParagraphStyle(
@@ -79,11 +79,14 @@ def generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_dat
         followers = portfolio_data.get("followers", "N/A")
         contributions = portfolio_data.get("contributions", "N/A")
 
+        data = [
+            [Paragraph("🧰 Repositories", normal_style), Paragraph(str(repos), normal_style)],
+            [Paragraph("👥 Followers", normal_style), Paragraph(str(followers), normal_style)],
+            [Paragraph("🔥 Contributions", normal_style), Paragraph(str(contributions), normal_style)]
+        ]
+
         content.append(Paragraph(f"<b>GitHub Username:</b> {username}", normal_style))
-        content.append(Paragraph(f"<b>Repositories:</b> {repos}", normal_style))
-        content.append(Paragraph(f"<b>Followers:</b> {followers}", normal_style))
-        content.append(Paragraph(f"<b>Contributions (this year):</b> {contributions}", normal_style))
-        content.append(Spacer(1, 20))
+        content.append(Spacer(1, 10))
 
     content.append(HRFlowable(width="100%", color=colors.lightgrey))
     content.append(Spacer(1, 6))
