@@ -15,6 +15,8 @@ st.write("Welcome! Upload your resume to get started.")
 uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 resume_text = ""
 
+portfolio_data = None
+
 if uploaded_file is not None:
     file_type = uploaded_file.name.split(".")[-1].lower()
 
@@ -43,24 +45,11 @@ if uploaded_file is not None:
 
             show_summary(result)
 
-            # ATS SCORE
             try:
                 ats_score = calculate_ats_score(resume_text, role)
                 st.subheader("📊 ATS Score")
                 st.progress(int(ats_score))
                 st.write(f"⭐ Your resume scored **{ats_score}/100** for the role: **{role}**")
-
-                # PDF EXPORT
-                if st.button("📄 Download PDF Report"):
-                    with st.spinner("Generating PDF report..."):
-                        pdf_path = generate_pdf_report(role, found, missing, feedback, ats_score)
-                        with open(pdf_path, "rb") as f:
-                            st.download_button(
-                                label="⬇️ Click here to download your report",
-                                data=f,
-                                file_name=pdf_path,
-                                mime="application/pdf"
-                            )
             except Exception as e:
                 st.error(f"Could not compute ATS score: {e}")
 
@@ -78,9 +67,9 @@ if username:
         st.error(data["error"])
     else:
         st.success(f"✅ GitHub data fetched for **{data['username']}**")
+        portfolio_data = data
 
         st.subheader("📊 Portfolio Summary")
-
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("🧰 Repositories", data["repositories"])
@@ -90,7 +79,6 @@ if username:
             st.metric("🔥 Contributions", data["contributions"])
 
         st.markdown("### 💬 Portfolio Feedback")
-
         feedback_lines = []
         try:
             if int(data["repositories"]) < 5:
@@ -107,3 +95,16 @@ if username:
                 st.write(f"- {line}")
         else:
             st.write("✅ Your GitHub profile looks strong — keep contributing regularly!")
+
+if resume_text and username and portfolio_data:
+    st.markdown("---")
+    if st.button("📄 Download Combined Report"):
+        with st.spinner("Generating combined PDF report..."):
+            pdf_path = generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_data)
+            with open(pdf_path, "rb") as f:
+                st.download_button(
+                    label="⬇️ Click here to download your report",
+                    data=f,
+                    file_name=pdf_path,
+                    mime="application/pdf"
+                )
