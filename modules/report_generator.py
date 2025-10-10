@@ -4,7 +4,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from datetime import datetime
 
-def generate_pdf_report(role, found, missing, feedback, ats_score):
+def generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_data=None):
     filename = f"resume_analysis_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
     doc = SimpleDocTemplate(filename, pagesize=A4)
@@ -55,16 +55,35 @@ def generate_pdf_report(role, found, missing, feedback, ats_score):
     content.append(Spacer(1, 10))
 
     content.append(Paragraph("Resume Feedback", subheader_style))
-    feedback_lines = feedback.split("\n")
-    for line in feedback_lines:
-        line = line.strip()
-        if line:
-            content.append(Paragraph(line, normal_style))
+    if isinstance(feedback, list):
+        for line in feedback:
+            content.append(Paragraph(f"• {line}", normal_style))
+    else:
+        for line in str(feedback).split("\n"):
+            line = line.strip()
+            if line:
+                content.append(Paragraph(f"• {line}", normal_style))
     content.append(Spacer(1, 10))
 
     content.append(Paragraph("ATS Score", subheader_style))
     content.append(Paragraph(f"Your resume scored <b>{ats_score}/100</b> for the role: <b>{role}</b>", normal_style))
     content.append(Spacer(1, 20))
+
+    if portfolio_data:
+        content.append(HRFlowable(width="100%", color=colors.lightgrey))
+        content.append(Spacer(1, 10))
+        content.append(Paragraph("Portfolio Summary (GitHub)", subheader_style))
+
+        username = portfolio_data.get("username", "N/A")
+        repos = portfolio_data.get("repositories", "N/A")
+        followers = portfolio_data.get("followers", "N/A")
+        contributions = portfolio_data.get("contributions", "N/A")
+
+        content.append(Paragraph(f"<b>GitHub Username:</b> {username}", normal_style))
+        content.append(Paragraph(f"<b>Repositories:</b> {repos}", normal_style))
+        content.append(Paragraph(f"<b>Followers:</b> {followers}", normal_style))
+        content.append(Paragraph(f"<b>Contributions (this year):</b> {contributions}", normal_style))
+        content.append(Spacer(1, 20))
 
     content.append(HRFlowable(width="100%", color=colors.lightgrey))
     content.append(Spacer(1, 6))
