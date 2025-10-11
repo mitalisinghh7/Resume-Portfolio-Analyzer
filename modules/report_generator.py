@@ -1,26 +1,26 @@
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from datetime import datetime
 
 def generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_data=None):
-    filename = f"resume_analysis_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
+    filename = f"resume_analysis_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
     doc = SimpleDocTemplate(filename, pagesize=A4)
     styles = getSampleStyleSheet()
 
     header_style = ParagraphStyle(
         'Header',
         parent=styles['Heading1'],
-        textColor=colors.darkblue,
-        spaceAfter=12
+        textColor=colors.HexColor("#0A3D62"),
+        spaceAfter=10
     )
 
     subheader_style = ParagraphStyle(
         'Subheader',
         parent=styles['Heading2'],
-        textColor=colors.darkred,
+        textColor=colors.HexColor("#1E3799"),
         spaceBefore=10,
         spaceAfter=6
     )
@@ -29,7 +29,17 @@ def generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_dat
         'NormalCustom',
         parent=styles['Normal'],
         fontSize=11,
-        leading=16
+        leading=16,
+        textColor=colors.black
+    )
+
+    highlight_style = ParagraphStyle(
+        'Highlight',
+        parent=styles['Normal'],
+        fontSize=11,
+        leading=16,
+        textColor=colors.HexColor("#006266"),
+        leftIndent=12
     )
 
     footer_style = ParagraphStyle(
@@ -42,7 +52,7 @@ def generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_dat
 
     content = []
 
-    content.append(Paragraph("Resume & Portfolio Analyzer Report", header_style))
+    content.append(Paragraph("Codeunia Resume & Portfolio Analyzer", header_style))
     content.append(HRFlowable(width="100%", color=colors.lightgrey))
     content.append(Spacer(1, 12))
 
@@ -57,12 +67,12 @@ def generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_dat
     content.append(Paragraph("Resume Feedback", subheader_style))
     if isinstance(feedback, list):
         for line in feedback:
-            content.append(Paragraph(f"• {line}", normal_style))
+            content.append(Paragraph(f"• {line}", highlight_style))
     else:
         for line in str(feedback).split("\n"):
             line = line.strip()
             if line:
-                content.append(Paragraph(f"• {line}", normal_style))
+                content.append(Paragraph(f"• {line}", highlight_style))
     content.append(Spacer(1, 10))
 
     content.append(Paragraph("ATS Score", subheader_style))
@@ -79,14 +89,11 @@ def generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_dat
         followers = portfolio_data.get("followers", "N/A")
         contributions = portfolio_data.get("contributions", "N/A")
 
-        data = [
-            [Paragraph("🧰 Repositories", normal_style), Paragraph(str(repos), normal_style)],
-            [Paragraph("👥 Followers", normal_style), Paragraph(str(followers), normal_style)],
-            [Paragraph("🔥 Contributions", normal_style), Paragraph(str(contributions), normal_style)]
-        ]
-
         content.append(Paragraph(f"<b>GitHub Username:</b> {username}", normal_style))
-        content.append(Spacer(1, 10))
+        content.append(Paragraph(f"<b>Repositories:</b> {repos}", normal_style))
+        content.append(Paragraph(f"<b>Followers:</b> {followers}", normal_style))
+        content.append(Paragraph(f"<b>Contributions (this year):</b> {contributions}", normal_style))
+        content.append(Spacer(1, 20))
 
     content.append(HRFlowable(width="100%", color=colors.lightgrey))
     content.append(Spacer(1, 6))
