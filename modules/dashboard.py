@@ -10,7 +10,6 @@ from storage_manager import init_db, save_analysis, get_user_history
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Initialize the database
 init_db()
 
 st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
@@ -83,7 +82,6 @@ if username:
         with col3:
             st.metric("🔥 Contributions", data["contributions"])
 
-        # Save analysis data
         try:
             save_analysis(
                 username=data["username"],
@@ -115,7 +113,6 @@ if username:
         else:
             st.write("✅ Your GitHub profile looks strong — keep contributing regularly!")
 
-        # --- Progress History Section ---
         st.markdown("---")
         st.subheader("📈 Progress History")
 
