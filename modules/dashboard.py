@@ -6,9 +6,11 @@ from ats_score import calculate_ats_score
 from ui_helpers import (display_resume_preview, display_keyword_analysis, display_feedback, show_summary, load_job_roles, select_job_role)
 from report_generator import generate_pdf_report
 from portfolio_analyzer import analyze_github_profile
-from storage_manager import init_db, save_analysis, get_user_history
+from storage_manager import init_db, save_analysis, get_user_history, get_leaderboard
 import pandas as pd
 import matplotlib.pyplot as plt
+import sqlite3
+from datetime import datetime
 
 init_db()
 
@@ -122,12 +124,23 @@ if username:
             st.dataframe(df)
 
             st.markdown("#### ATS Score Trend")
-            fig, ax = plt.subplots()
-            ax.plot(df["Date"], df["ATS Score"], marker="o", color="royalblue")
+            fig, ax = plt.subplots(figsize=(6, 4))
+            ax.plot(df["Date"], df["ATS Score"], marker="o", linestyle="-", color="royalblue", linewidth=2)
             ax.set_xlabel("Date")
             ax.set_ylabel("ATS Score")
             ax.set_title("ATS Score Over Time")
             plt.xticks(rotation=45)
+            ax.grid(True, linestyle="--", alpha=0.5)
             st.pyplot(fig)
         else:
             st.info("No progress history yet — analyze a resume to start tracking your growth!")
+
+        st.markdown("---")
+        st.subheader("🧹 Manage Your Data")
+        if st.button("Clear My History"):
+            conn = sqlite3.connect("analysis_history.db")
+            c = conn.cursor()
+            c.execute("DELETE FROM history WHERE username=?", (username,))
+            conn.commit()
+            conn.close()
+            st.success("✅ Your history has been cleared successfully! Run a new analysis to start fresh.")
