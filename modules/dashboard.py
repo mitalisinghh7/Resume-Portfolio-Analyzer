@@ -6,6 +6,12 @@ from ats_score import calculate_ats_score
 from ui_helpers import (display_resume_preview, display_keyword_analysis, display_feedback, show_summary, load_job_roles, select_job_role)
 from report_generator import generate_pdf_report
 from portfolio_analyzer import analyze_github_profile
+from storage_manager import init_db, save_analysis, get_user_history
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Initialize the database
+init_db()
 
 st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 
@@ -14,8 +20,7 @@ st.write("Welcome! Upload your resume to get started.")
 
 uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 resume_text = ""
-
-portfolio_data = None
+username = ""
 
 if uploaded_file is not None:
     file_type = uploaded_file.name.split(".")[-1].lower()
@@ -67,9 +72,9 @@ if username:
         st.error(data["error"])
     else:
         st.success(f"✅ GitHub data fetched for **{data['username']}**")
-        portfolio_data = data
 
         st.subheader("📊 Portfolio Summary")
+
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("🧰 Repositories", data["repositories"])
@@ -78,7 +83,21 @@ if username:
         with col3:
             st.metric("🔥 Contributions", data["contributions"])
 
+        # Save analysis data
+        try:
+            save_analysis(
+                username=data["username"],
+                role=role if 'role' in locals() else "N/A",
+                ats_score=ats_score if 'ats_score' in locals() else 0,
+                repos=data["repositories"],
+                followers=data["followers"],
+                contributions=data["contributions"]
+            )
+        except Exception as e:
+            st.warning(f"⚠️ Could not save data: {e}")
+
         st.markdown("### 💬 Portfolio Feedback")
+
         feedback_lines = []
         try:
             if int(data["repositories"]) < 5:
@@ -96,15 +115,22 @@ if username:
         else:
             st.write("✅ Your GitHub profile looks strong — keep contributing regularly!")
 
-if resume_text and username and portfolio_data:
-    st.markdown("---")
-    if st.button("📄 Download Combined Report"):
-        with st.spinner("Generating combined PDF report..."):
-            pdf_path = generate_pdf_report(role, found, missing, feedback, ats_score, portfolio_data)
-            with open(pdf_path, "rb") as f:
-                st.download_button(
-                    label="⬇️ Click here to download your report",
-                    data=f,
-                    file_name=pdf_path,
-                    mime="application/pdf"
-                )
+        # --- Progress History Section ---
+        st.markdown("---")
+        st.subheader("📈 Progress History")
+
+        history = get_user_history(username)
+        if history:
+            df = pd.DataFrame(history, columns=["Role", "ATS Score", "Repositories", "Followers", "Contributions", "Date"])
+            st.dataframe(df)
+
+            st.markdown("#### ATS Score Trend")
+            fig, ax = plt.subplots()
+            ax.plot(df["Date"], df["ATS Score"], marker="o", color="royalblue")
+            ax.set_xlabel("Date")
+            ax.set_ylabel("ATS Score")
+            ax.set_title("ATS Score Over Time")
+            plt.xticks(rotation=45)
+            st.pyplot(fig)
+        else:
+            st.info("No progress history yet — analyze a resume to start tracking your growth!")
