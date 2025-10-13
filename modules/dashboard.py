@@ -136,6 +136,22 @@ if username:
             st.info("No progress history yet — analyze a resume to start tracking your growth!")
 
         st.markdown("---")
+        st.header("🏆 Leaderboard")
+        leaderboard = get_leaderboard()
+        if leaderboard:
+            st.write("Top performers across Codeunia:")
+            st.table(
+                {
+                    "Rank": [i + 1 for i in range(len(leaderboard))],
+                    "Username": [row[0] for row in leaderboard],
+                    "Avg ATS Score": [round(row[1], 2) for row in leaderboard],
+                    "Total Contributions": [row[2] for row in leaderboard],
+                }
+            )
+        else:
+            st.info("No leaderboard data yet — as more users analyze their resumes, this will fill up!")
+
+        st.markdown("---")
         st.subheader("🧹 Manage Your Data")
         if st.button("Clear My History"):
             conn = sqlite3.connect("analysis_history.db")
