@@ -81,7 +81,6 @@ if uploaded_file is not None:
                     with col3:
                         st.metric("🔥 Contributions", data["contributions"])
 
-                    # save user data
                     try:
                         save_analysis(
                             username=data["username"],
@@ -91,8 +90,10 @@ if uploaded_file is not None:
                             followers=data["followers"],
                             contributions=data["contributions"]
                         )
-                    except Exception as e:
-                        st.warning(f"⚠️ Could not save data: {e}")
+                    except sqlite3.OperationalError as exc:
+                        st.error(f"Database error while saving analysis: {exc}")
+                    except Exception as exc:
+                        st.warning(f"⚠️ Could not save data: {exc}")
 
                     # export to PDF
                     if st.button("📄 Export as PDF"):
@@ -100,14 +101,23 @@ if uploaded_file is not None:
                             filename = generate_pdf_report(role, result, feedback, ats_score, data)
                         st.success("✅ PDF report generated successfully!")
                         with open(filename, "rb") as pdf_file:
-                            st.download_button("⬇️ Download Report", data=pdf_file, file_name=filename)
+                            st.download_button("⬇️ Download Report", data=pdf_file, file_name=filename, mime="application/pdf")
 
                     st.markdown("---")
                     st.subheader("📈 Progress History")
 
-                    history = get_user_history(username)
+                    try:
+                        history = get_user_history(username)
+                    except sqlite3.OperationalError as exc:
+                        st.error(f"Database error while fetching history: {exc}")
+                        history = []
+                    except Exception as exc:
+                        st.warning(f"Could not fetch history: {exc}")
+                        history = []
+
                     if history:
-                        df = pd.DataFrame(history, columns=["Role", "ATS Score", "Repositories", "Followers", "Contributions", "Date"])
+                        # history rows
+                        df = pd.DataFrame(history, columns=["Role", "ATS Score", "Repositories", "Followers", "Contributions", "Points", "Date"])
                         st.dataframe(df)
 
                         st.markdown("#### ATS Score Trend")
@@ -124,17 +134,16 @@ if uploaded_file is not None:
 
                     st.markdown("---")
                     st.header("🏆 Leaderboard")
-                    leaderboard = get_leaderboard()
+                    try:
+                        leaderboard = get_leaderboard()
+                    except Exception as exc:
+                        st.error(f"Could not load leaderboard: {exc}")
+                        leaderboard = []
+
                     if leaderboard:
-                        st.write("Top performers:")
-                        st.table(
-                            {
-                                "Rank": [i + 1 for i in range(len(leaderboard))],
-                                "Username": [row[0] for row in leaderboard],
-                                "Avg ATS Score": [round(row[1], 2) for row in leaderboard],
-                                "Total Contributions": [row[2] for row in leaderboard],
-                            }
-                        )
+                        leaderboard_df = pd.DataFrame(leaderboard, columns=["Username", "Avg ATS Score", "Total Contributions", "Total Points"])
+                        leaderboard_df.index = leaderboard_df.index + 1
+                        st.dataframe(leaderboard_df)
                     else:
                         st.info("No leaderboard data yet!")
 
