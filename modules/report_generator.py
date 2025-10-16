@@ -1,61 +1,134 @@
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, HRFlowable, ListFlowable, ListItem)
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from datetime import datetime
+import os
 
 def generate_pdf_report(role, result, feedback, ats_score, portfolio_data=None):
+
+    out_dir = os.path.abspath(os.path.dirname(__file__))
     filename = f"resume_portfolio_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-    doc = SimpleDocTemplate(filename, pagesize=A4)
+    filepath = os.path.join(out_dir, filename)
+
+    doc = SimpleDocTemplate(filepath, pagesize=A4, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
+
     styles = getSampleStyleSheet()
 
-    header_style = ParagraphStyle('Header', parent=styles['Heading1'], textColor=colors.HexColor("#0A3D62"))
-    subheader_style = ParagraphStyle('Subheader', parent=styles['Heading2'], textColor=colors.HexColor("#1E3799"))
-    normal_style = ParagraphStyle('NormalCustom', parent=styles['Normal'], fontSize=11, leading=16)
-    highlight_style = ParagraphStyle('Highlight', parent=styles['Normal'], fontSize=11, leading=16, textColor=colors.HexColor("#006266"))
-    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], textColor=colors.grey, alignment=1, fontSize=9)
+    title_style = ParagraphStyle(
+        "TitleStyle",
+        parent=styles["Heading1"],
+        fontSize=18,
+        leading=22,
+        textColor=colors.HexColor("#0A3D62"),
+        spaceAfter=12
+    )
+
+    section_style = ParagraphStyle(
+        "SectionStyle",
+        parent=styles["Heading2"],
+        fontSize=13,
+        leading=16,
+        textColor=colors.HexColor("#1E3799"),
+        spaceBefore=10,
+        spaceAfter=6
+    )
+
+    normal = ParagraphStyle(
+        "NormalCustom",
+        parent=styles["Normal"],
+        fontSize=11,
+        leading=15
+    )
+
+    highlight = ParagraphStyle(
+        "Highlight",
+        parent=styles["Normal"],
+        fontSize=11,
+        leading=15,
+        textColor=colors.HexColor("#006266")
+    )
+
+    footer = ParagraphStyle(
+        "Footer",
+        parent=styles["Normal"],
+        fontSize=9,
+        leading=11,
+        alignment=1,
+        textColor=colors.grey
+    )
 
     content = []
-    content.append(Paragraph("Resume & Portfolio Analysis Report", header_style))
-    content.append(HRFlowable(width="100%", color=colors.lightgrey))
+
+    content.append(Paragraph("Resume & Portfolio Analyzer Report", title_style))
+    content.append(HRFlowable(width="100%", thickness=1, color=colors.lightgrey))
+    content.append(Spacer(1, 10))
+
+    content.append(Paragraph(f"<b>Selected Role:</b> {role}", normal))
+    content.append(Spacer(1, 8))
+
+    content.append(Paragraph("Keyword Analysis", section_style))
+    found = result.get("found", []) if isinstance(result, dict) else []
+    missing = result.get("missing", []) if isinstance(result, dict) else []
+    content.append(Paragraph(f"<b>Found Keywords:</b> {', '.join(found) if found else 'None'}", normal))
+    content.append(Paragraph(f"<b>Missing Keywords:</b> {', '.join(missing) if missing else 'None'}", normal))
+    content.append(Spacer(1, 8))
+
+    # feedback as bullet list
+    content.append(Paragraph("Resume Feedback", section_style))
+
+    feedback_lines = []
+    if isinstance(feedback, (list, tuple)):
+        for item in feedback:
+            if isinstance(item, str):
+                for ln in item.splitlines():
+                    ln = ln.strip()
+                    if ln:
+                        feedback_lines.append(ln)
+    else:
+        for ln in str(feedback).splitlines():
+            ln = ln.strip()
+            if ln:
+                feedback_lines.append(ln)
+
+    list_items = []
+    for line in feedback_lines:
+        cleaned = line.lstrip("-•* ").strip()
+        list_items.append(ListItem(Paragraph(cleaned, normal), bulletColor=colors.HexColor("#0A3D62")))
+
+    if list_items:
+        content.append(ListFlowable(list_items, bulletType="bullet", leftIndent=12))
+    else:
+        content.append(Paragraph("No specific feedback generated.", normal))
+
+    content.append(Spacer(1, 10))
+
+    # ats Score
+    content.append(Paragraph("ATS Score", section_style))
+    content.append(Paragraph(f"Your resume scored <b>{ats_score}/100</b> for the role: <b>{role}</b>", normal))
     content.append(Spacer(1, 12))
 
-    content.append(Paragraph(f"<b>Selected Role:</b> {role}", normal_style))
-    content.append(Spacer(1, 10))
-
-    content.append(Paragraph("Keyword Analysis", subheader_style))
-    found = result.get("found", [])
-    missing = result.get("missing", [])
-    content.append(Paragraph(f"<b>Found Keywords:</b> {', '.join(found) if found else 'None'}", normal_style))
-    content.append(Paragraph(f"<b>Missing Keywords:</b> {', '.join(missing) if missing else 'None'}", normal_style))
-    content.append(Spacer(1, 10))
-
-    content.append(Paragraph("Feedback", subheader_style))
-    for line in feedback:
-        content.append(Paragraph(f"• {line}", highlight_style))
-    content.append(Spacer(1, 10))
-
-    content.append(Paragraph("ATS Score", subheader_style))
-    content.append(Paragraph(f"Your resume scored <b>{ats_score}/100</b>.", normal_style))
-    content.append(Spacer(1, 20))
-
+    # portfolio section
     if portfolio_data:
-        content.append(HRFlowable(width="100%", color=colors.lightgrey))
-        content.append(Spacer(1, 10))
-        content.append(Paragraph("Portfolio Summary (GitHub)", subheader_style))
+        content.append(HRFlowable(width="100%", thickness=1, color=colors.lightgrey))
+        content.append(Spacer(1, 8))
+        content.append(Paragraph("Portfolio Summary (GitHub)", section_style))
+
         username = portfolio_data.get("username", "N/A")
         repos = portfolio_data.get("repositories", "N/A")
         followers = portfolio_data.get("followers", "N/A")
         contributions = portfolio_data.get("contributions", "N/A")
 
-        content.append(Paragraph(f"<b>GitHub Username:</b> {username}", normal_style))
-        content.append(Paragraph(f"<b>Repositories:</b> {repos}", normal_style))
-        content.append(Paragraph(f"<b>Followers:</b> {followers}", normal_style))
-        content.append(Paragraph(f"<b>Contributions (this year):</b> {contributions}", normal_style))
+        content.append(Paragraph(f"<b>GitHub Username:</b> {username}", normal))
+        content.append(Paragraph(f"<b>Repositories:</b> {repos}", normal))
+        content.append(Paragraph(f"<b>Followers:</b> {followers}", normal))
+        content.append(Paragraph(f"<b>Contributions (this year):</b> {contributions}", normal))
+        content.append(Spacer(1, 12))
 
-    content.append(Spacer(1, 20))
-    content.append(HRFlowable(width="100%", color=colors.lightgrey))
-    content.append(Paragraph("Generated by Resume & Portfolio Analyzer", footer_style))
+    content.append(HRFlowable(width="100%", thickness=1, color=colors.lightgrey))
+    content.append(Spacer(1, 6))
+    content.append(Paragraph("Generated by Resume & Portfolio Analyzer", footer))
 
     doc.build(content)
-    return filename
+
+    return filepath
