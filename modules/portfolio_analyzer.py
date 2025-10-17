@@ -9,8 +9,7 @@ def _safe_int(s):
     except Exception:
         return 0
 
-def analyze_github_profile(username):
-    """Fetch GitHub stats with reliable contributions count."""
+def analyze_github_profile(username: str):
     if not username or not str(username).strip():
         return {"error": "GitHub username cannot be empty."}
 
@@ -26,25 +25,41 @@ def analyze_github_profile(username):
         followers = _safe_int(data.get("followers", 0))
 
         contributions = 0
-        html = requests.get(contrib_url, headers=HEADERS, timeout=8).text
-
-        m = re.search(r'([0-9][0-9,]*)\s+contributions\s+in\s+the\s+last\s+year', html, re.I)
-        if m:
-            contributions = _safe_int(m.group(1))
-        else:
-            counts = re.findall(r'data-count="(\d+)"', html)
-            if counts:
-                contributions = sum(int(c) for c in counts)
+        try:
+            html = requests.get(contrib_url, headers=HEADERS, timeout=8).text
+            m = re.search(r'([0-9][0-9,]*)\s+contributions\s+in\s+the\s+last\s+year', html, re.I)
+            if m:
+                contributions = _safe_int(m.group(1))
             else:
-                nums = re.findall(r'([0-9][0-9,]*)\s+contributions', html, re.I)
-                if nums:
-                    contributions = max(_safe_int(x) for x in nums)
+                counts = re.findall(r'data-count="(\d+)"', html)
+                if counts:
+                    contributions = sum(int(c) for c in counts)
+                else:
+                    nums = re.findall(r'([0-9][0-9,]*)\s+contributions', html, re.I)
+                    if nums:
+                        contributions = max(_safe_int(x) for x in nums)
+        except Exception:
+            contributions = 0
+
+        feedback_lines = []
+        if repositories < 5:
+            feedback_lines.append("Consider adding more repositories to showcase your work.")
+        if followers < 20:
+            feedback_lines.append("Engage with the community to increase visibility (follow, star, comment).")
+        if contributions < 100:
+            feedback_lines.append("Increase commit activity to show consistent progress.")
+        if not feedback_lines:
+            feedback_lines.append("Nice portfolio — keep contributing and polishing projects!")
+
+        feedback_text = " ".join(feedback_lines)
 
         return {
             "username": username,
             "repositories": repositories,
             "followers": followers,
-            "contributions": contributions
+            "contributions": contributions,
+            "feedback": feedback_lines,
+            "feedback_text": feedback_text
         }
 
     except requests.exceptions.RequestException as e:
