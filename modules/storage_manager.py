@@ -5,11 +5,9 @@ from typing import List, Tuple, Any
 DB_NAME = "analysis_history.db"
 
 def init_db():
-
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    # create table with points column
     c.execute("""
         CREATE TABLE IF NOT EXISTS history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,8 +26,11 @@ def init_db():
     c.execute("PRAGMA table_info('history')")
     cols = [row[1] for row in c.fetchall()]
     if "points" not in cols:
-        c.execute("ALTER TABLE history ADD COLUMN points INTEGER DEFAULT 0")
-        conn.commit()
+        try:
+            c.execute("ALTER TABLE history ADD COLUMN points INTEGER DEFAULT 0")
+            conn.commit()
+        except Exception:
+            pass
 
     conn.close()
 
@@ -40,6 +41,7 @@ def _safe_int(value: Any) -> int:
         return 0
 
 def _compute_points(ats_score: Any, contributions: Any) -> int:
+    """points algorithm: - points = rounded ATS score + (contributions // 10)"""
     try:
         base = int(round(float(ats_score)))
     except Exception:
@@ -49,7 +51,6 @@ def _compute_points(ats_score: Any, contributions: Any) -> int:
     return max(0, base + bonus)
 
 def save_analysis(username: str, role: str, ats_score: float, repos: Any, followers: Any, contributions: Any):
-
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -68,7 +69,6 @@ def save_analysis(username: str, role: str, ats_score: float, repos: Any, follow
     conn.close()
 
 def get_user_history(username: str) -> List[Tuple]:
-
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute("""
@@ -82,7 +82,6 @@ def get_user_history(username: str) -> List[Tuple]:
     return data
 
 def get_leaderboard() -> List[Tuple]:
-
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute("""
@@ -98,3 +97,24 @@ def get_leaderboard() -> List[Tuple]:
     leaderboard = c.fetchall()
     conn.close()
     return leaderboard
+
+def recalc_all_points():
+
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    try:
+        rows = c.execute("""
+            SELECT id, ats_score, contributions
+            FROM history
+            WHERE points IS NULL OR points = 0
+        """).fetchall()
+    except sqlite3.OperationalError:
+        rows = []
+
+    for row in rows:
+        row_id, ats, contrib = row
+        pts = _compute_points(ats, contrib)
+        c.execute("UPDATE history SET points = ? WHERE id = ?", (pts, row_id))
+
+    conn.commit()
+    conn.close()
