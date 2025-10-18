@@ -7,13 +7,17 @@ from ui_helpers import (display_resume_preview, display_keyword_analysis, displa
 from report_generator import generate_pdf_report
 from portfolio_analyzer import analyze_github_profile
 from storage_manager import init_db, save_analysis, get_user_history, get_leaderboard, recalc_all_points
+from nlp_analysis import extract_keywords, generate_wordcloud_bytes
 import pandas as pd
 import matplotlib.pyplot as plt
 import sqlite3
 from datetime import datetime
 
 init_db()
-recalc_all_points()
+try:
+    recalc_all_points()
+except Exception:
+    pass
 
 st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 st.title("🎓 Resume & Portfolio Analyzer")
@@ -45,6 +49,7 @@ if uploaded_file is not None:
             st.session_state["role"] = role
             st.write(f"📌 Selected Role: **{role}**")
 
+            # keyword analysis
             result = analyze_keywords(resume_text, keywords)
             st.session_state["result"] = result
             display_keyword_analysis(result)
@@ -57,6 +62,7 @@ if uploaded_file is not None:
 
             show_summary(result)
 
+            # ats score
             try:
                 ats_score = calculate_ats_score(resume_text, role)
                 st.session_state["ats_score"] = ats_score
@@ -65,6 +71,31 @@ if uploaded_file is not None:
                 st.write(f"⭐ Your resume scored **{ats_score}/100** for the role: **{role}**")
             except Exception as e:
                 st.error(f"Could not compute ATS score: {e}")
+
+            st.markdown("---")
+            st.subheader("🧠 NLP Insights")
+
+            try:
+                top_keywords = extract_keywords(resume_text, top_n=40)
+                if top_keywords:
+                    st.write("**Top keywords (by frequency):**", ", ".join(top_keywords[:20]))
+                else:
+                    st.info("No prominent keywords found.")
+            except Exception as e:
+                st.warning(f"Keyword extraction failed: {e}")
+
+            # generate wordcloud bytes
+            wc_bytes = None
+            try:
+                wc_bytes = generate_wordcloud_bytes(resume_text)
+            except Exception:
+                wc_bytes = None
+
+            # show wordcloud
+            if wc_bytes:
+                show_wordcloud(wc_bytes, title="🌥️ Resume WordCloud")
+            else:
+                st.info("WordCloud unavailable (install 'wordcloud' package to enable).")
 
 st.markdown("---")
 st.header("🌐 Portfolio Analyzer")
@@ -124,9 +155,9 @@ if username:
             with open(filename, "rb") as pdf_file:
                 st.download_button("⬇️ Download Report", data=pdf_file, file_name=filename, mime="application/pdf")
 
+        # progress history
         st.markdown("---")
         st.subheader("📈 Progress History")
-
         try:
             history = get_user_history(username)
         except sqlite3.OperationalError as exc:
@@ -154,8 +185,9 @@ if username:
             ax.grid(True, linestyle="--", alpha=0.5)
             st.pyplot(fig)
         else:
-            st.info("No progress history yet — analyze a resume or portfolio to start tracking your growth!")
+            st.info("No progress history yet — analyze a resume to start tracking your growth!")
 
+        # leaderboard
         st.markdown("---")
         st.header("🏆 Leaderboard")
         try:
@@ -170,7 +202,6 @@ if username:
             st.dataframe(leaderboard_df)
         else:
             st.info("No leaderboard data yet!")
-
         st.markdown("---")
         st.subheader("🧹 Manage Your Data")
         if st.button("Clear My History"):
@@ -179,6 +210,5 @@ if username:
             c.execute("DELETE FROM history WHERE username=?", (username,))
             conn.commit()
             conn.close()
+            st.session_state["last_saved_profile"] = None
             st.success("✅ History cleared successfully!")
-            if st.session_state.get("last_saved_profile") == username:
-                st.session_state["last_saved_profile"] = None
