@@ -7,7 +7,7 @@ from ui_helpers import (display_resume_preview, display_keyword_analysis, displa
 from report_generator import generate_pdf_report
 from portfolio_analyzer import analyze_github_profile
 from storage_manager import init_db, save_analysis, get_user_history, get_leaderboard, recalc_all_points
-from nlp_analysis import extract_keywords, generate_wordcloud_bytes
+from nlp_analysis import extract_keywords, generate_wordcloud_bytes, get_top_skills
 import pandas as pd
 import matplotlib.pyplot as plt
 import sqlite3
@@ -96,6 +96,17 @@ if uploaded_file is not None:
                 show_wordcloud(wc_bytes, title="🌥️ Resume WordCloud")
             else:
                 st.info("WordCloud unavailable (install 'wordcloud' package to enable).")
+
+            st.markdown("---")
+            st.subheader("📊 Top 5 Most Frequent Skills")
+            try:
+                top_skills = get_top_skills(resume_text, top_n=5)
+                if top_skills:
+                    st.write(", ".join([s.capitalize() for s in top_skills]))
+                else:
+                    st.info("No top skills found.")
+            except Exception as e:
+                st.warning(f"Top skills extraction failed: {e}")
 
 st.markdown("---")
 st.header("🌐 Portfolio Analyzer")
