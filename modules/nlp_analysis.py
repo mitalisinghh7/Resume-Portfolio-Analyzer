@@ -20,6 +20,20 @@ def extract_keywords(text: str, top_n: int = 30) -> List[str]:
     counts = Counter(filtered)
     return [tok for tok, _ in counts.most_common(top_n)]
 
+def get_top_skills(text: str, top_n: int = 5) -> List[str]:
+
+    TECHNICAL_SKILLS = {"python", "java", "c++", "sql", "pandas", "numpy", "matplotlib",
+        "tensorflow", "scikit-learn", "machine", "learning", "deep", "django",
+        "flask", "react", "aws", "docker", "html", "css", "javascript"}
+
+    tokens = [t.lower() for t in __simple_tokenize(text)]
+    filtered = [
+        t for t in tokens
+        if len(t) > 2 and t not in _STOPWORDS and not t.isdigit() and t in TECHNICAL_SKILLS]
+
+    counts = Counter(filtered)
+    return [tok for tok, _ in counts.most_common(top_n)]
+
 def generate_wordcloud_bytes(text: str, max_words: int = 150) -> bytes:
 
     if not text:
