@@ -3,5 +3,10 @@
   "Java Developer": ["Java", "Spring Boot", "Hibernate", "Microservices", "SQL"],
   "Data Scientist": ["Python", "Machine Learning", "Pandas", "Numpy", "SQL", "Deep Learning"],
   "Full Stack Developer": ["JavaScript", "React", "Node.js", "MongoDB", "Express", "MERN"],
-  "Machine Learning Engineer": ["Python", "TensorFlow", "Scikit-learn", "Machine Learning", "Deep Learning"]
+  "Machine Learning Engineer": ["Python", "TensorFlow", "Scikit-learn", "Machine Learning", "Deep Learning"],
+  "Frontend Developer": ["HTML", "CSS", "JavaScript", "React", "UI/UX", "Bootstrap"],
+  "Backend Developer": ["Python", "Flask", "Django", "REST APIs", "Databases", "SQL"],
+  "Data Analyst": ["Excel", "Python", "Power BI", "SQL", "Data Visualization", "Statistics"],
+  "AI Engineer": ["Python", "TensorFlow", "Keras", "Deep Learning", "NLP"],
+  "DevOps Engineer": ["Linux", "Docker", "Kubernetes", "AWS", "CI/CD", "Automation"]
 }
