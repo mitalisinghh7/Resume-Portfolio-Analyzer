@@ -1,9 +1,18 @@
 {
-  "sql": "SQL is important for handling databases. Add projects or coursework where you used SQL.",
-  "machine learning": "Machine Learning is highly valued. Highlight Kaggle work, internships, or academic projects.",
-  "mern": "MERN stack shows full-stack web development. Add portfolio or group projects if available.",
-  "teamwork": "Employers look for collaboration. Mention projects where you worked in a team.",
-  "communication": "Strong communication helps in interviews and jobs. Highlight presentations or reports.",
-  "git": "Git is a must for version control. Add GitHub links to your projects.",
-  "python": "Python is your strength. Highlight achievements or unique projects where you applied it."
+  "python": "Python is your strength. Highlight unique projects or certifications using Python.",
+  "django": "Django is a great backend framework. Include web apps or APIs you built using it.",
+  "flask": "Flask is lightweight and flexible. Add small projects or REST APIs made with Flask.",
+  "sql": "SQL is essential for managing databases. Include projects or coursework involving SQL.",
+  "apis": "APIs connect systems. Mention when you designed or consumed REST APIs.",
+  "java": "Showcase your Java projects, especially with Spring Boot or backend systems.",
+  "spring boot": "Spring Boot simplifies backend development. Include any microservice projects.",
+  "hibernate": "Hibernate helps manage databases efficiently. Add experience using it in Java apps.",
+  "microservices": "Microservices architecture is valuable. Highlight modular projects using this approach.",
+  "pandas": "Pandas is powerful for data manipulation. Mention data-cleaning or analytics work.",
+  "numpy": "NumPy shows analytical thinking. Add numerical computing or ML preprocessing tasks.",
+  "machine learning": "Machine Learning is in high demand. Highlight Kaggle work or academic projects.",
+  "deep learning": "Deep Learning is a hot skill. Add work with TensorFlow or PyTorch.",
+  "javascript": "JavaScript powers the web. Highlight dynamic websites or frontend logic you built.",
+  "react": "React shows modern web skills. Include interactive UI projects.",
+  "node.js": "Node.js is great for backends. Mention your API or real-time apps built with it."
 }
