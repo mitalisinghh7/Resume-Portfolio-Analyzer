@@ -14,5 +14,17 @@
   "deep learning": "Deep Learning is a hot skill. Add work with TensorFlow or PyTorch.",
   "javascript": "JavaScript powers the web. Highlight dynamic websites or frontend logic you built.",
   "react": "React shows modern web skills. Include interactive UI projects.",
-  "node.js": "Node.js is great for backends. Mention your API or real-time apps built with it."
+  "node.js": "Node.js is great for backends. Mention your API or real-time apps built with it.",
+  "mongodb": "MongoDB suits modern apps. Add examples of NoSQL database integration.",
+  "express": "Express supports Node.js APIs. Mention server-side projects using it.",
+  "mern": "MERN stack shows full-stack web skills. Add any portfolio or group project using it.",
+  "html": "HTML is the web’s backbone. Add clean, semantic markup experience.",
+  "css": "CSS shows design sense. Mention responsive design or frameworks like Bootstrap.",
+  "ui/ux": "UI/UX experience is valuable. Showcase designs or user-centered projects.",
+  "bootstrap": "Bootstrap helps with responsive design. Mention modern layouts you created using it.",
+  "excel": "Excel is core for data analysis. Mention data cleaning or dashboards.",
+  "power bi": "Power BI helps with data storytelling. Add visualization dashboards you built.",
+  "data visualization": "Data visualization makes insights clear. Highlight charts or storytelling projects.",
+  "statistics": "Statistics is the base of data science. Add academic work or analysis-based projects.",
+  "tensorflow": "TensorFlow is core to AI/ML. Add models or projects using it."
 }
