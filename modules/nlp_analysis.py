@@ -2,6 +2,7 @@ from typing import List
 from collections import Counter
 import re
 import io
+import pandas as pd
 
 _STOPWORDS = {"and", "the", "for", "with", "from", "that", "this", "you", "are", "was", "have",
     "has", "will", "not", "your", "but", "our", "they", "their", "them", "about", "which",
@@ -12,7 +13,6 @@ def __simple_tokenize(text: str) -> List[str]:
     return re.findall(r"[A-Za-z0-9\-\+#]+", text)
 
 def extract_keywords(text: str, top_n: int = 30) -> List[str]:
-
     if not text:
         return []
     tokens = [t.lower() for t in __simple_tokenize(text)]
@@ -34,8 +34,24 @@ def get_top_skills(text: str, top_n: int = 5) -> List[str]:
     counts = Counter(filtered)
     return [tok for tok, _ in counts.most_common(top_n)]
 
-def generate_wordcloud_bytes(text: str, max_words: int = 150) -> bytes:
+def get_skill_frequencies(text: str):
+    if not text:
+        return pd.DataFrame(columns=["Skill", "Count"])
 
+    TECHNICAL_SKILLS = {"python", "java", "c++", "sql", "pandas", "numpy", "matplotlib",
+        "tensorflow", "scikit-learn", "machine", "learning", "deep", "django",
+        "flask", "react", "aws", "docker", "html", "css", "javascript"}
+
+    tokens = [t.lower() for t in __simple_tokenize(text)]
+    filtered = [t for t in tokens if t in TECHNICAL_SKILLS]
+    if not filtered:
+        return pd.DataFrame(columns=["Skill", "Count"])
+
+    counts = Counter(filtered)
+    df = pd.DataFrame(counts.items(), columns=["Skill", "Count"]).sort_values(by="Count", ascending=False)
+    return df.reset_index(drop=True)
+
+def generate_wordcloud_bytes(text: str, max_words: int = 150) -> bytes:
     if not text:
         return None
 
