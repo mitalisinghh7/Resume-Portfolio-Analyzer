@@ -6,8 +6,8 @@ from ats_score import calculate_ats_score
 from ui_helpers import (display_resume_preview, display_keyword_analysis, display_feedback, show_summary, load_job_roles, select_job_role, display_portfolio_feedback, show_wordcloud)
 from report_generator import generate_pdf_report
 from portfolio_analyzer import analyze_github_profile
-from storage_manager import init_db, save_analysis, get_user_history, get_leaderboard, recalc_all_points
-from nlp_analysis import extract_keywords, generate_wordcloud_bytes, get_top_skills
+from storage_manager import (init_db, save_analysis, get_user_history, get_leaderboard, recalc_all_points)
+from nlp_analysis import extract_keywords, generate_wordcloud_bytes, get_top_skills, get_skill_frequencies
 import pandas as pd
 import matplotlib.pyplot as plt
 import sqlite3
@@ -107,6 +107,27 @@ if uploaded_file is not None:
                     st.info("No top skills found.")
             except Exception as e:
                 st.warning(f"Top skills extraction failed: {e}")
+
+            # skill frequency table and chart
+            st.markdown("---")
+            st.subheader("💪 Skill Frequency Strength")
+
+            try:
+                skill_df = get_skill_frequencies(resume_text)
+                if not skill_df.empty:
+                    st.dataframe(skill_df)
+
+                    fig, ax = plt.subplots(figsize=(6, 4))
+                    ax.barh(skill_df["Skill"], skill_df["Count"])
+                    ax.invert_yaxis()
+                    ax.set_xlabel("Frequency")
+                    ax.set_ylabel("Skill")
+                    ax.set_title("Skill Strength in Resume")
+                    st.pyplot(fig)
+                else:
+                    st.info("No technical skills detected for frequency analysis.")
+            except Exception as e:
+                st.warning(f"Skill frequency analysis failed: {e}")
 
 st.markdown("---")
 st.header("🌐 Portfolio Analyzer")
