@@ -26,5 +26,14 @@
   "power bi": "Power BI helps with data storytelling. Add visualization dashboards you built.",
   "data visualization": "Data visualization makes insights clear. Highlight charts or storytelling projects.",
   "statistics": "Statistics is the base of data science. Add academic work or analysis-based projects.",
-  "tensorflow": "TensorFlow is core to AI/ML. Add models or projects using it."
+  "tensorflow": "TensorFlow is core to AI/ML. Add models or projects using it.",
+  "scikit-learn": "Scikit-learn shows practical ML skills. Mention models or analysis work.",
+  "keras": "Keras helps in fast model building. Highlight neural network projects with it.",
+  "nlp": "NLP is a key AI field. Mention chatbots, text analysis, or sentiment analysis projects.",
+  "linux": "Linux knowledge is crucial for DevOps. Mention scripting or system automation tasks.",
+  "docker": "Docker is essential for containerization. Highlight how you containerized projects.",
+  "kubernetes": "Kubernetes shows orchestration skills. Mention deployments or scaling experience.",
+  "aws": "AWS is widely used in industry. Add projects using cloud deployment or hosting.",
+  "ci/cd": "CI/CD pipelines show automation experience. Mention your workflow automation projects.",
+  "automation": "Automation improves efficiency. Highlight scripts or systems you’ve automated."
 }
