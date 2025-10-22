@@ -7,7 +7,7 @@ from ui_helpers import (display_resume_preview, display_keyword_analysis, displa
 from report_generator import generate_pdf_report
 from portfolio_analyzer import analyze_github_profile
 from storage_manager import (init_db, save_analysis, get_user_history, get_leaderboard, recalc_all_points)
-from nlp_analysis import extract_keywords, generate_wordcloud_bytes, get_top_skills, get_skill_frequencies
+from nlp_analysis import extract_keywords, generate_wordcloud_bytes, get_top_skills, get_skill_frequencies, calculate_skill_match_percentage
 import pandas as pd
 import matplotlib.pyplot as plt
 import sqlite3
@@ -128,6 +128,23 @@ if uploaded_file is not None:
                     st.info("No technical skills detected for frequency analysis.")
             except Exception as e:
                 st.warning(f"Skill frequency analysis failed: {e}")
+
+            # skill match %
+            st.markdown("---")
+            st.subheader("🔗 Skill Match Percentage")
+
+            try:
+                percent, matched_count, total_required, matched_list = calculate_skill_match_percentage(resume_text, keywords)
+                st.metric(label="Match (%)", value=f"{percent}%")
+                st.progress(int(percent))
+
+                st.write(f"Matched {matched_count} out of {total_required} required keywords for **{role}**.")
+                if matched_list:
+                    st.write("Matched keywords:", ", ".join(matched_list))
+                else:
+                    st.info("No required keywords were matched in the resume.")
+            except Exception as e:
+                st.warning(f"Could not compute skill match percentage: {e}")
 
 st.markdown("---")
 st.header("🌐 Portfolio Analyzer")
