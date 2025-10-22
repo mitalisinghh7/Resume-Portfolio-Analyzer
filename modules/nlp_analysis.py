@@ -51,6 +51,36 @@ def get_skill_frequencies(text: str):
     df = pd.DataFrame(counts.items(), columns=["Skill", "Count"]).sort_values(by="Count", ascending=False)
     return df.reset_index(drop=True)
 
+def calculate_skill_match_percentage(text: str, required_skills: List[str]):
+
+    if not required_skills:
+        return 0, 0, 0, []
+
+    text_lower = text.lower()
+    matched = []
+
+    for skill in required_skills:
+        if not skill or not isinstance(skill, str):
+            continue
+        skill_norm = skill.strip().lower()
+
+        try:
+            pattern = r"\b" + re.escape(skill_norm) + r"\b"
+            if re.search(pattern, text_lower):
+                matched.append(skill)
+                continue
+        except re.error:
+            pass
+
+        if skill_norm in text_lower:
+            matched.append(skill)
+            continue
+
+    total = len(required_skills)
+    matched_count = len(matched)
+    percent = int(round((matched_count / total) * 100)) if total > 0 else 0
+    return percent, matched_count, total, matched
+
 def generate_wordcloud_bytes(text: str, max_words: int = 150) -> bytes:
     if not text:
         return None
