@@ -146,6 +146,20 @@ if uploaded_file is not None:
             except Exception as e:
                 st.warning(f"Could not compute skill match percentage: {e}")
 
+                # combined insights
+                from ui_helpers import display_resume_insights
+
+                try:
+                    display_resume_insights(
+                        match_percent=percent,
+                        ats_score=st.session_state.get("ats_score", 0),
+                        role=role,
+                        missing_keywords=result.get("missing", [])
+                    )
+                except Exception as e:
+                    st.warning(f"Could not show resume insights: {e}")
+
+# portfolio analyzer
 st.markdown("---")
 st.header("🌐 Portfolio Analyzer")
 st.write("Enter your GitHub username to analyze your public portfolio.")
