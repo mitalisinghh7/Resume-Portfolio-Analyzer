@@ -76,7 +76,6 @@ def display_portfolio_feedback(feedback):
         st.markdown(f"- {line}")
 
 def show_wordcloud(image_bytes: bytes = None, title: str = "🖼️ Word Cloud (resume strengths)"):
-
     st.subheader(title)
     if image_bytes:
         try:
@@ -89,3 +88,24 @@ def show_wordcloud(image_bytes: bytes = None, title: str = "🖼️ Word Cloud (
                 st.error("Could not render word cloud image.")
     else:
         st.info("Word cloud will appear here once NLP analysis is run.")
+
+def display_resume_insights(match_percent: float, ats_score: float, role: str, missing_keywords: list):
+    st.markdown("---")
+    st.subheader("💡 Resume Insights")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("ATS Score", f"{ats_score}/100")
+        st.progress(int(ats_score))
+    with col2:
+        st.metric("Skill Match", f"{match_percent}%")
+        st.progress(int(match_percent))
+
+    if missing_keywords:
+        st.markdown("**Suggestions for improvement:**")
+        for kw in missing_keywords:
+            st.markdown(f"- Add or highlight: **{kw}**")
+    else:
+        st.success("Your resume already covers all the key skills for this role!")
+
+    st.info(f"Role analyzed: **{role}**")
