@@ -21,7 +21,6 @@ def extract_keywords(text: str, top_n: int = 30) -> List[str]:
     return [tok for tok, _ in counts.most_common(top_n)]
 
 def get_top_skills(text: str, top_n: int = 5) -> List[str]:
-
     TECHNICAL_SKILLS = {"python", "java", "c++", "sql", "pandas", "numpy", "matplotlib",
         "tensorflow", "scikit-learn", "machine", "learning", "deep", "django",
         "flask", "react", "aws", "docker", "html", "css", "javascript"}
@@ -52,7 +51,6 @@ def get_skill_frequencies(text: str):
     return df.reset_index(drop=True)
 
 def calculate_skill_match_percentage(text: str, required_skills: List[str]):
-
     if not required_skills:
         return 0, 0, 0, []
 
@@ -74,7 +72,6 @@ def calculate_skill_match_percentage(text: str, required_skills: List[str]):
 
         if skill_norm in text_lower:
             matched.append(skill)
-            continue
 
     total = len(required_skills)
     matched_count = len(matched)
@@ -109,3 +106,17 @@ def generate_wordcloud_bytes(text: str, max_words: int = 150) -> bytes:
         return buf.getvalue()
     except Exception:
         return None
+
+# skill coverage
+def calculate_skill_coverage(text: str, required_skills: List[str]):
+    if not text or not required_skills:
+        return 0, 0, 0
+
+    text_lower = text.lower()
+    found = [s for s in required_skills if s.lower() in text_lower]
+    missing = [s for s in required_skills if s.lower() not in text_lower]
+
+    found_count = len(found)
+    missing_count = len(missing)
+    coverage = int(round((found_count / len(required_skills)) * 100)) if required_skills else 0
+    return found_count, missing_count, coverage
