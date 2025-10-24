@@ -137,27 +137,32 @@ if uploaded_file is not None:
                 percent, matched_count, total_required, matched_list = calculate_skill_match_percentage(resume_text, keywords)
                 st.metric(label="Match (%)", value=f"{percent}%")
                 st.progress(int(percent))
-
                 st.write(f"Matched {matched_count} out of {total_required} required keywords for **{role}**.")
                 if matched_list:
                     st.write("Matched keywords:", ", ".join(matched_list))
                 else:
                     st.info("No required keywords were matched in the resume.")
-            except Exception as e:
-                st.warning(f"Could not compute skill match percentage: {e}")
 
                 # combined insights
                 from ui_helpers import display_resume_insights
+                from nlp_analysis import calculate_skill_coverage
 
-                try:
-                    display_resume_insights(
-                        match_percent=percent,
-                        ats_score=st.session_state.get("ats_score", 0),
-                        role=role,
-                        missing_keywords=result.get("missing", [])
-                    )
-                except Exception as e:
-                    st.warning(f"Could not show resume insights: {e}")
+                display_resume_insights(
+                    match_percent=percent,
+                    ats_score=st.session_state.get("ats_score", 0),
+                    role=role,
+                    missing_keywords=result.get("missing", [])
+                )
+
+                # skill coverage summary
+                st.markdown("### 📋 Skill Coverage Summary")
+                found_count, missing_count, coverage = calculate_skill_coverage(resume_text, keywords)
+                st.write(f"- ✅ Found Skills: {found_count}")
+                st.write(f"- ❌ Missing Skills: {missing_count}")
+                st.write(f"- 📊 Coverage: {coverage}%")
+
+            except Exception as e:
+                st.warning(f"Could not compute skill match or insights: {e}")
 
 # portfolio analyzer
 st.markdown("---")
