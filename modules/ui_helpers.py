@@ -27,7 +27,7 @@ def display_resume_preview(resume_text: str):
         st.info("No resume text extracted yet.")
         return
     with st.expander("Show extracted text", expanded=False):
-        st.text_area("", resume_text, height=320)
+        st.text_area("Resume Preview", resume_text, height=320, label_visibility="collapsed")
 
 def display_keyword_analysis(result: dict):
     st.subheader("🔎 Keyword Analysis")
