@@ -191,6 +191,44 @@ if username:
 
         display_portfolio_feedback(data.get("feedback", data.get("feedback_text", [])))
 
+        # resume ↔ gitHub skill alignment
+        st.markdown("---")
+        st.subheader("🤝 Resume ↔ GitHub Skill Alignment")
+
+        try:
+            resume_text = st.session_state.get("resume_text", "")
+            github_langs = data.get("top_languages", {})
+
+            if resume_text and github_langs:
+                langs_in_github = [lang.lower() for lang in github_langs.keys()]
+
+                from nlp_analysis import extract_keywords
+
+                resume_keywords = extract_keywords(resume_text, top_n=50)
+                resume_keywords = [k.lower() for k in resume_keywords]
+
+                matched = [lang for lang in langs_in_github if lang in resume_keywords]
+                missing = [lang for lang in langs_in_github if lang not in resume_keywords]
+
+                if langs_in_github:
+                    percent = int((len(matched) / len(langs_in_github)) * 100)
+                else:
+                    percent = 0
+
+                st.metric(label="Alignment (%)", value=f"{percent}%")
+                st.write(f"✅ **Matched Skills:** {', '.join(matched) if matched else 'None'}")
+                st.write(f"❌ **Missing from Resume:** {', '.join(missing) if missing else 'None'}")
+
+                st.markdown("#### 💻 Top GitHub Languages")
+                for lang, count in github_langs.items():
+                    st.write(f"- {lang}: {count:,} lines of code")
+
+            else:
+                st.info("Upload your resume and enter your GitHub username to view alignment insights.")
+
+        except Exception as e:
+            st.warning(f"Could not compute Resume ↔ GitHub alignment: {e}")
+
         already_saved = st.session_state.get("last_saved_profile")
         if already_saved != data["username"]:
             try:
