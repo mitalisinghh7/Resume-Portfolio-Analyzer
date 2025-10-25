@@ -1,5 +1,6 @@
 import requests
 import re
+from collections import Counter
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
@@ -8,6 +9,31 @@ def _safe_int(s):
         return int(str(s).replace(",", "").strip())
     except Exception:
         return 0
+
+def fetch_top_languages(username: str, max_repos: int = 10):
+    try:
+        repos_url = f"https://api.github.com/users/{username}/repos"
+        res = requests.get(repos_url, headers=HEADERS, timeout=10)
+        if res.status_code != 200:
+            return {}
+
+        repos = res.json()
+        language_counts = Counter()
+
+        for repo in repos[:max_repos]:
+            lang_url = repo.get("languages_url")
+            if not lang_url:
+                continue
+            lang_res = requests.get(lang_url, headers=HEADERS, timeout=5)
+            if lang_res.status_code == 200:
+                langs = lang_res.json()
+                for lang, count in langs.items():
+                    language_counts[lang] += count
+
+        return dict(language_counts.most_common(5))
+
+    except Exception:
+        return {}
 
 def analyze_github_profile(username: str):
     if not username or not str(username).strip():
@@ -24,6 +50,7 @@ def analyze_github_profile(username: str):
         repositories = _safe_int(data.get("public_repos", 0))
         followers = _safe_int(data.get("followers", 0))
 
+        # ---- Contributions ----
         contributions = 0
         try:
             html = requests.get(contrib_url, headers=HEADERS, timeout=8).text
@@ -40,6 +67,8 @@ def analyze_github_profile(username: str):
                         contributions = max(_safe_int(x) for x in nums)
         except Exception:
             contributions = 0
+
+        top_languages = fetch_top_languages(username)
 
         feedback_lines = []
         if repositories < 5:
@@ -58,6 +87,7 @@ def analyze_github_profile(username: str):
             "repositories": repositories,
             "followers": followers,
             "contributions": contributions,
+            "top_languages": top_languages,
             "feedback": feedback_lines,
             "feedback_text": feedback_text
         }
