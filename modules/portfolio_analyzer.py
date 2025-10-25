@@ -1,8 +1,14 @@
 import requests
 import re
 from collections import Counter
+import os
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
+
+# gitHub token support to prevent rate limits
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+if GITHUB_TOKEN:
+    HEADERS["Authorization"] = f"token {GITHUB_TOKEN}"
 
 def _safe_int(s):
     try:
@@ -50,7 +56,7 @@ def analyze_github_profile(username: str):
         repositories = _safe_int(data.get("public_repos", 0))
         followers = _safe_int(data.get("followers", 0))
 
-        # ---- Contributions ----
+        # contributions
         contributions = 0
         try:
             html = requests.get(contrib_url, headers=HEADERS, timeout=8).text
