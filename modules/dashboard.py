@@ -223,6 +223,27 @@ if username:
                 for lang, count in github_langs.items():
                     st.write(f"- {lang}: {count:,} lines of code")
 
+                # top github Language vs resume focus ----
+                st.markdown("### 📊 GitHub Language vs Resume Focus")
+
+                try:
+                    top_lang = max(github_langs, key=github_langs.get)
+
+                    # most frequent skill from resume
+                    from nlp_analysis import get_top_skills
+                    resume_top_skills = get_top_skills(resume_text, top_n=1)
+                    resume_focus = resume_top_skills[0] if resume_top_skills else "Unknown"
+
+                    st.write(f"**🏆 Top GitHub Language:** {top_lang}")
+                    st.write(f"**🧠 Resume Focus Area:** {resume_focus}")
+
+                    if top_lang.lower() == resume_focus.lower():
+                        st.success("Perfect alignment — your GitHub projects reflect your resume focus! 🎯")
+                    else:
+                        st.info("Partial alignment — consider adding GitHub projects related to your resume focus.")
+                except Exception as e:
+                    st.warning(f"Could not analyze GitHub vs Resume focus: {e}")
+
             else:
                 st.info("Upload your resume and enter your GitHub username to view alignment insights.")
 
