@@ -5,7 +5,7 @@ import os
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-# gitHub token support to prevent rate limits
+# github token support to prevent rate limits
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 if GITHUB_TOKEN:
     HEADERS["Authorization"] = f"token {GITHUB_TOKEN}"
@@ -56,7 +56,6 @@ def analyze_github_profile(username: str):
         repositories = _safe_int(data.get("public_repos", 0))
         followers = _safe_int(data.get("followers", 0))
 
-        # contributions
         contributions = 0
         try:
             html = requests.get(contrib_url, headers=HEADERS, timeout=8).text
@@ -100,3 +99,9 @@ def analyze_github_profile(username: str):
 
     except requests.exceptions.RequestException as e:
         return {"error": f"Network error: {e}"}
+
+# get the single top language
+def get_top_language(top_languages: dict):
+    if not top_languages:
+        return None
+    return next(iter(top_languages.keys()))
