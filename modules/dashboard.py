@@ -223,7 +223,55 @@ if username:
                 for lang, count in github_langs.items():
                     st.write(f"- {lang}: {count:,} lines of code")
 
-                # top github Language vs resume focus ----
+                # combined resume & portfolio visualization
+                st.markdown("---")
+                st.subheader("📊 Resume & Portfolio Combined Visualization")
+
+                try:
+                    col1, col2 = st.columns(2)
+
+                    # resume skill distribution (pie chart)
+                    with col1:
+                        st.markdown("#### Resume Skill Distribution")
+                        from nlp_analysis import get_skill_frequencies
+                        resume_skill_df = get_skill_frequencies(resume_text)
+                        if not resume_skill_df.empty:
+                            fig1, ax1 = plt.subplots()
+                            ax1.pie(
+                                resume_skill_df["Count"],
+                                labels=resume_skill_df["Skill"],
+                                autopct="%1.1f%%",
+                                startangle=90
+                            )
+                            ax1.axis("equal")
+                            st.pyplot(fig1)
+                        else:
+                            st.info("No skills found in resume for visualization.")
+
+                    # gitHub language distribution (bar chart)
+                    with col2:
+                        st.markdown("#### GitHub Language Distribution")
+                        if github_langs:
+                            fig2, ax2 = plt.subplots()
+                            langs = list(github_langs.keys())
+                            lines = list(github_langs.values())
+                            ax2.bar(langs, lines)
+                            ax2.set_xlabel("Languages")
+                            ax2.set_ylabel("Lines of Code")
+                            ax2.set_title("GitHub Language Distribution")
+                            plt.xticks(rotation=45)
+                            st.pyplot(fig2)
+                        else:
+                            st.info("No GitHub languages available for visualization.")
+
+                    st.success(
+                        "✅ Insight: The closer the resume skill ratio matches GitHub language ratio, "
+                        "the stronger your profile alignment.")
+
+                except Exception as e:
+                    st.warning(f"Could not generate combined visualization: {e}")
+
+                # top github language vs resume focus
                 st.markdown("### 📊 GitHub Language vs Resume Focus")
 
                 try:
