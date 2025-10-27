@@ -2,7 +2,9 @@ import streamlit as st
 import json
 import os
 import io
+import matplotlib.pyplot as plt
 
+# job role
 def load_job_roles(json_file: str = "job_descriptions.json"):
     try:
         base_dir = os.path.dirname(__file__)
@@ -21,6 +23,7 @@ def select_job_role(job_roles: dict):
     role = st.selectbox("Choose a job role:", list(job_roles.keys()))
     return role, job_roles[role]
 
+# resume ui
 def display_resume_preview(resume_text: str):
     st.subheader("📄 Extracted Resume Text (Preview)")
     if not resume_text:
@@ -59,6 +62,7 @@ def show_summary(result: dict):
     st.write(f"- Found: {found_count}")
     st.write(f"- Missing: {missing_count}")
 
+# portfolio ui
 def display_portfolio_feedback(feedback):
     st.subheader("💬 Portfolio Feedback")
     if not feedback:
@@ -75,6 +79,7 @@ def display_portfolio_feedback(feedback):
     for line in lines:
         st.markdown(f"- {line}")
 
+# wordcloud
 def show_wordcloud(image_bytes: bytes = None, title: str = "🖼️ Word Cloud (resume strengths)"):
     st.subheader(title)
     if image_bytes:
@@ -89,6 +94,7 @@ def show_wordcloud(image_bytes: bytes = None, title: str = "🖼️ Word Cloud (
     else:
         st.info("Word cloud will appear here once NLP analysis is run.")
 
+# resume insights
 def display_resume_insights(match_percent: float, ats_score: float, role: str, missing_keywords: list):
     st.markdown("---")
     st.subheader("💡 Resume Insights")
@@ -109,3 +115,32 @@ def display_resume_insights(match_percent: float, ats_score: float, role: str, m
         st.success("Your resume already covers all the key skills for this role!")
 
     st.info(f"Role analyzed: **{role}**")
+
+# combined visualization
+def show_combined_visualization(resume_skills: dict, github_langs: dict):
+    if not resume_skills or not github_langs:
+        st.info("Upload your resume and connect GitHub to view combined visualization.")
+        return
+
+    st.markdown("---")
+    st.header("📊 Resume & Portfolio Combined Visualization")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Resume Skill Distribution")
+        fig1, ax1 = plt.subplots(figsize=(4, 4))
+        ax1.pie(resume_skills.values(), labels=resume_skills.keys(), autopct='%1.1f%%', startangle=140)
+        ax1.axis("equal")
+        st.pyplot(fig1)
+
+    with col2:
+        st.subheader("GitHub Language Distribution")
+        fig2, ax2 = plt.subplots(figsize=(4, 4))
+        ax2.bar(github_langs.keys(), github_langs.values())
+        ax2.set_xlabel("Languages")
+        ax2.set_ylabel("Lines of Code")
+        plt.xticks(rotation=45)
+        st.pyplot(fig2)
+
+    st.markdown("✅ **Insight:** The closer the resume skill ratio matches GitHub language ratio, the stronger your profile alignment.")
