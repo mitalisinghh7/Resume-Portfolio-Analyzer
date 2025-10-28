@@ -12,6 +12,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sqlite3
 from datetime import datetime
+import numpy as np
 
 init_db()
 try:
@@ -27,6 +28,7 @@ for k in ["resume_text", "role", "result", "feedback", "ats_score", "last_saved_
     if k not in st.session_state:
         st.session_state[k] = None
 
+# upload resume
 uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 resume_text = ""
 
@@ -72,6 +74,7 @@ if uploaded_file is not None:
             except Exception as e:
                 st.error(f"Could not compute ATS score: {e}")
 
+            # nlp insights
             st.markdown("---")
             st.subheader("🧠 NLP Insights")
 
@@ -97,6 +100,7 @@ if uploaded_file is not None:
             else:
                 st.info("WordCloud unavailable (install 'wordcloud' package to enable).")
 
+            # top 5 skills
             st.markdown("---")
             st.subheader("📊 Top 5 Most Frequent Skills")
             try:
@@ -182,12 +186,9 @@ if username:
 
         st.subheader("📊 Portfolio Summary")
         col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("🧰 Repositories", data["repositories"])
-        with col2:
-            st.metric("👥 Followers", data["followers"])
-        with col3:
-            st.metric("🔥 Contributions", data["contributions"])
+        col1.metric("🧰 Repositories", data["repositories"])
+        col2.metric("👥 Followers", data["followers"])
+        col3.metric("🔥 Contributions", data["contributions"])
 
         display_portfolio_feedback(data.get("feedback", data.get("feedback_text", [])))
 
@@ -201,19 +202,12 @@ if username:
 
             if resume_text and github_langs:
                 langs_in_github = [lang.lower() for lang in github_langs.keys()]
-
-                from nlp_analysis import extract_keywords
-
-                resume_keywords = extract_keywords(resume_text, top_n=50)
-                resume_keywords = [k.lower() for k in resume_keywords]
+                resume_keywords = [k.lower() for k in extract_keywords(resume_text, top_n=50)]
 
                 matched = [lang for lang in langs_in_github if lang in resume_keywords]
                 missing = [lang for lang in langs_in_github if lang not in resume_keywords]
 
-                if langs_in_github:
-                    percent = int((len(matched) / len(langs_in_github)) * 100)
-                else:
-                    percent = 0
+                percent = int((len(matched) / len(langs_in_github)) * 100) if langs_in_github else 0
 
                 st.metric(label="Alignment (%)", value=f"{percent}%")
                 st.write(f"✅ **Matched Skills:** {', '.join(matched) if matched else 'None'}")
@@ -228,6 +222,12 @@ if username:
                 st.subheader("📊 Resume & Portfolio Combined Visualization")
 
                 try:
+                    # summary metrics
+                    colA, colB = st.columns(2)
+                    colA.metric("🎯 Alignment Strength", f"{percent}%")
+                    coverage = int((len(matched) / max(1, len(resume_keywords))) * 100)
+                    colB.metric("📘 Skill Coverage", f"{coverage}%")
+
                     col1, col2 = st.columns(2)
 
                     # resume skill distribution (pie chart)
@@ -264,9 +264,33 @@ if username:
                         else:
                             st.info("No GitHub languages available for visualization.")
 
-                    st.success(
-                        "✅ Insight: The closer the resume skill ratio matches GitHub language ratio, "
-                        "the stronger your profile alignment.")
+                    # radar chart
+                    st.markdown("#### 🕸️ Technical Focus Radar Chart")
+                    try:
+                        skills = list(set(list(resume_skill_df["Skill"])[:5] + list(github_langs.keys())[:5]))
+                        resume_values = [resume_skill_df.set_index("Skill").get("Count", {}).get(skill, 0) for skill in skills]
+                        github_values = [github_langs.get(skill, 0) for skill in skills]
+
+                        angles = np.linspace(0, 2 * np.pi, len(skills), endpoint=False).tolist()
+                        resume_values += resume_values[:1]
+                        github_values += github_values[:1]
+                        angles += angles[:1]
+
+                        fig3, ax3 = plt.subplots(subplot_kw=dict(polar=True))
+                        ax3.plot(angles, resume_values, "o-", linewidth=2, label="Resume Skills")
+                        ax3.fill(angles, resume_values, alpha=0.25)
+                        ax3.plot(angles, github_values, "o-", linewidth=2, label="GitHub Languages")
+                        ax3.fill(angles, github_values, alpha=0.25)
+                        ax3.set_xticks(angles[:-1])
+                        ax3.set_xticklabels(skills)
+                        ax3.set_title("Resume vs GitHub Technical Focus")
+                        ax3.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
+                        st.pyplot(fig3)
+                    except Exception as e:
+                        st.warning(f"Radar chart could not be generated: {e}")
+
+                    st.success("✅ Insight: The closer your resume and GitHub skill patterns align, "
+                        "the stronger your technical consistency and focus.")
 
                 except Exception as e:
                     st.warning(f"Could not generate combined visualization: {e}")
