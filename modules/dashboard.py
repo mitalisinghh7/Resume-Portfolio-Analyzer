@@ -27,321 +27,330 @@ for k in ["resume_text", "role", "result", "feedback", "ats_score", "last_saved_
     if k not in st.session_state:
         st.session_state[k] = None
 
-# upload resume
-uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
-resume_text = ""
+# layout of tabs
+tab_resume, tab_portfolio, tab_progress, tab_leaderboard = st.tabs(
+    ["📄 Resume", "🌐 Portfolio", "📈 Progress", "🏆 Leaderboard"]
+)
 
-if uploaded_file is not None:
-    file_type = uploaded_file.name.split(".")[-1].lower()
-    if file_type == "pdf":
-        resume_text = extract_text_from_pdf(uploaded_file)
-    elif file_type == "docx":
-        resume_text = extract_text_from_docx(uploaded_file)
-    else:
-        st.error("Unsupported file type!")
+# resume uploader & analysis
+with tab_resume:
+    st.header("📄 Resume Analyzer")
+    uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
+    resume_text = ""
 
-    if resume_text:
-        st.session_state["resume_text"] = resume_text
-        display_resume_preview(resume_text)
+    if uploaded_file is not None:
+        file_type = uploaded_file.name.split(".")[-1].lower()
+        if file_type == "pdf":
+            resume_text = extract_text_from_pdf(uploaded_file)
+        elif file_type == "docx":
+            resume_text = extract_text_from_docx(uploaded_file)
+        else:
+            st.error("Unsupported file type!")
 
-        job_roles = load_job_roles()
-        if job_roles:
-            role, keywords = select_job_role(job_roles)
-            st.session_state["role"] = role
-            st.write(f"📌 Selected Role: **{role}**")
+        if resume_text:
+            st.session_state["resume_text"] = resume_text
+            display_resume_preview(resume_text)
 
-            # keyword analysis
-            result = analyze_keywords(resume_text, keywords)
-            st.session_state["result"] = result
-            display_keyword_analysis(result)
+            job_roles = load_job_roles()
+            if job_roles:
+                role, keywords = select_job_role(job_roles)
+                st.session_state["role"] = role
+                st.write(f"📌 Selected Role: **{role}**")
 
-            found = result.get("found", [])
-            missing = result.get("missing", [])
-            feedback = generate_feedback(found, missing)
-            st.session_state["feedback"] = feedback
-            display_feedback(feedback)
+                # keyword analysis
+                result = analyze_keywords(resume_text, keywords)
+                st.session_state["result"] = result
+                display_keyword_analysis(result)
 
-            show_summary(result)
+                found = result.get("found", [])
+                missing = result.get("missing", [])
+                feedback = generate_feedback(found, missing)
+                st.session_state["feedback"] = feedback
+                display_feedback(feedback)
 
-            # ats score
-            try:
-                ats_score = calculate_ats_score(resume_text, role)
-                st.session_state["ats_score"] = ats_score
-                st.subheader("📊 ATS Score")
-                st.progress(int(ats_score))
-                st.write(f"⭐ Your resume scored **{ats_score}/100** for the role: **{role}**")
-            except Exception as e:
-                st.error(f"Could not compute ATS score: {e}")
+                show_summary(result)
 
-            # nlp insights
-            st.markdown("---")
-            st.subheader("🧠 NLP Insights")
+                # ats score
+                try:
+                    ats_score = calculate_ats_score(resume_text, role)
+                    st.session_state["ats_score"] = ats_score
+                    st.subheader("📊 ATS Score")
+                    st.progress(int(ats_score))
+                    st.write(f"⭐ Your resume scored **{ats_score}/100** for the role: **{role}**")
+                except Exception as e:
+                    st.error(f"Could not compute ATS score: {e}")
 
-            try:
-                top_keywords = extract_keywords(resume_text, top_n=40)
-                if top_keywords:
-                    st.write("**Top keywords (by frequency):**", ", ".join(top_keywords[:20]))
-                else:
-                    st.info("No prominent keywords found.")
-            except Exception as e:
-                st.warning(f"Keyword extraction failed: {e}")
+                # nlp insights
+                st.markdown("---")
+                st.subheader("🧠 NLP Insights")
+                try:
+                    top_keywords = extract_keywords(resume_text, top_n=40)
+                    if top_keywords:
+                        st.write("**Top keywords (by frequency):**", ", ".join(top_keywords[:20]))
+                    else:
+                        st.info("No prominent keywords found.")
+                except Exception as e:
+                    st.warning(f"Keyword extraction failed: {e}")
 
-            # generate wordcloud bytes
-            wc_bytes = None
-            try:
-                wc_bytes = generate_wordcloud_bytes(resume_text)
-            except Exception:
+                # wordcloud
                 wc_bytes = None
+                try:
+                    wc_bytes = generate_wordcloud_bytes(resume_text)
+                except Exception:
+                    wc_bytes = None
 
-            # show wordcloud
-            if wc_bytes:
-                show_wordcloud(wc_bytes, title="🌥️ Resume WordCloud")
-            else:
-                st.info("WordCloud unavailable (install 'wordcloud' package to enable).")
-
-            # top 5 skills
-            st.markdown("---")
-            st.subheader("📊 Top 5 Most Frequent Skills")
-            try:
-                top_skills = get_top_skills(resume_text, top_n=5)
-                if top_skills:
-                    st.write(", ".join([s.capitalize() for s in top_skills]))
+                if wc_bytes:
+                    show_wordcloud(wc_bytes, title="🌥️ Resume WordCloud")
                 else:
-                    st.info("No top skills found.")
-            except Exception as e:
-                st.warning(f"Top skills extraction failed: {e}")
+                    st.info("WordCloud unavailable (install 'wordcloud' package to enable).")
 
-            # skill frequency table and chart
-            st.markdown("---")
-            st.subheader("💪 Skill Frequency Strength")
+                # top 5 skills
+                st.markdown("---")
+                st.subheader("📊 Top 5 Most Frequent Skills")
+                try:
+                    top_skills = get_top_skills(resume_text, top_n=5)
+                    if top_skills:
+                        st.write(", ".join([s.capitalize() for s in top_skills]))
+                    else:
+                        st.info("No top skills found.")
+                except Exception as e:
+                    st.warning(f"Top skills extraction failed: {e}")
 
-            try:
-                skill_df = get_skill_frequencies(resume_text)
-                if not skill_df.empty:
-                    st.dataframe(skill_df)
+                # skill frequency table and chart
+                st.markdown("---")
+                st.subheader("💪 Skill Frequency Strength")
+                try:
+                    skill_df = get_skill_frequencies(resume_text)
+                    if not skill_df.empty:
+                        st.dataframe(skill_df)
+                        fig, ax = plt.subplots(figsize=(6, 4))
+                        ax.barh(skill_df["Skill"], skill_df["Count"])
+                        ax.invert_yaxis()
+                        ax.set_xlabel("Frequency")
+                        ax.set_ylabel("Skill")
+                        ax.set_title("Skill Strength in Resume")
+                        st.pyplot(fig)
+                    else:
+                        st.info("No technical skills detected for frequency analysis.")
+                except Exception as e:
+                    st.warning(f"Skill frequency analysis failed: {e}")
 
-                    fig, ax = plt.subplots(figsize=(6, 4))
-                    ax.barh(skill_df["Skill"], skill_df["Count"])
-                    ax.invert_yaxis()
-                    ax.set_xlabel("Frequency")
-                    ax.set_ylabel("Skill")
-                    ax.set_title("Skill Strength in Resume")
-                    st.pyplot(fig)
-                else:
-                    st.info("No technical skills detected for frequency analysis.")
-            except Exception as e:
-                st.warning(f"Skill frequency analysis failed: {e}")
+                # skill match %
+                st.markdown("---")
+                st.subheader("🔗 Skill Match Percentage")
+                try:
+                    percent, matched_count, total_required, matched_list = calculate_skill_match_percentage(resume_text, keywords)
+                    st.metric(label="Match (%)", value=f"{percent}%")
+                    st.progress(int(percent))
+                    st.write(f"Matched {matched_count} out of {total_required} required keywords for **{role}**.")
+                    if matched_list:
+                        st.write("Matched keywords:", ", ".join(matched_list))
+                    else:
+                        st.info("No required keywords were matched in the resume.")
 
-            # skill match %
-            st.markdown("---")
-            st.subheader("🔗 Skill Match Percentage")
+                    # combined insights
+                    from ui_helpers import display_resume_insights
+                    from nlp_analysis import calculate_skill_coverage
 
-            try:
-                percent, matched_count, total_required, matched_list = calculate_skill_match_percentage(resume_text, keywords)
-                st.metric(label="Match (%)", value=f"{percent}%")
-                st.progress(int(percent))
-                st.write(f"Matched {matched_count} out of {total_required} required keywords for **{role}**.")
-                if matched_list:
-                    st.write("Matched keywords:", ", ".join(matched_list))
-                else:
-                    st.info("No required keywords were matched in the resume.")
+                    display_resume_insights(
+                        match_percent=percent,
+                        ats_score=st.session_state.get("ats_score", 0),
+                        role=role,
+                        missing_keywords=result.get("missing", [])
+                    )
 
-                # combined insights
-                from ui_helpers import display_resume_insights
-                from nlp_analysis import calculate_skill_coverage
+                    st.markdown("### 📋 Skill Coverage Summary")
+                    found_count, missing_count, coverage = calculate_skill_coverage(resume_text, keywords)
+                    st.write(f"- ✅ Found Skills: {found_count}")
+                    st.write(f"- ❌ Missing Skills: {missing_count}")
+                    st.write(f"- 📊 Coverage: {coverage}%")
 
-                display_resume_insights(
-                    match_percent=percent,
-                    ats_score=st.session_state.get("ats_score", 0),
-                    role=role,
-                    missing_keywords=result.get("missing", [])
-                )
-
-                # skill coverage summary
-                st.markdown("### 📋 Skill Coverage Summary")
-                found_count, missing_count, coverage = calculate_skill_coverage(resume_text, keywords)
-                st.write(f"- ✅ Found Skills: {found_count}")
-                st.write(f"- ❌ Missing Skills: {missing_count}")
-                st.write(f"- 📊 Coverage: {coverage}%")
-
-            except Exception as e:
-                st.warning(f"Could not compute skill match or insights: {e}")
+                except Exception as e:
+                    st.warning(f"Could not compute skill match or insights: {e}")
 
 # portfolio analyzer
-st.markdown("---")
-st.header("🌐 Portfolio Analyzer")
-st.write("Enter your GitHub username to analyze your public portfolio.")
-username = st.text_input("GitHub Username", placeholder="e.g., torvalds")
+with tab_portfolio:
+    st.header("🌐 Portfolio Analyzer")
+    st.write("Enter your GitHub username to analyze your public portfolio.")
+    username = st.text_input("GitHub Username", placeholder="e.g., torvalds")
 
-if username:
-    with st.spinner("Fetching GitHub data..."):
-        data = analyze_github_profile(username)
+    col_r1, col_r2, col_r3, col_r4 = st.columns(4)
+    with col_r1:
+        uploaded_flag = "Yes" if st.session_state.get("resume_text") else "No"
+        st.metric("Resume Uploaded", uploaded_flag)
+    with col_r2:
+        st.metric("Selected Role", st.session_state.get("role", "N/A"))
+    with col_r3:
+        st.metric("Last ATS Score", st.session_state.get("ats_score", 0))
+    with col_r4:
+        st.metric("Alignment (%)", "N/A")
 
-    if "error" in data:
-        st.error(data["error"])
-    else:
-        st.success(f"✅ GitHub data fetched for **{data['username']}**")
-        st.session_state["portfolio_data"] = data
+    if username:
+        with st.spinner("Fetching GitHub data..."):
+            data = analyze_github_profile(username)
 
-        st.subheader("📊 Portfolio Summary")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("🧰 Repositories", data["repositories"])
-        with col2:
-            st.metric("👥 Followers", data["followers"])
-        with col3:
-            st.metric("🔥 Contributions", data["contributions"])
-
-        display_portfolio_feedback(data.get("feedback", data.get("feedback_text", [])))
-
-        # resume ↔ gitHub skill alignment
-        st.markdown("---")
-        st.subheader("🤝 Resume ↔ GitHub Skill Alignment")
-
-        try:
-            resume_text = st.session_state.get("resume_text", "")
-            github_langs = data.get("top_languages", {})
-
-            if resume_text and github_langs:
-                langs_in_github = [lang.lower() for lang in github_langs.keys()]
-
-                from nlp_analysis import extract_keywords
-
-                resume_keywords = extract_keywords(resume_text, top_n=50)
-                resume_keywords = [k.lower() for k in resume_keywords]
-
-                matched = [lang for lang in langs_in_github if lang in resume_keywords]
-                missing = [lang for lang in langs_in_github if lang not in resume_keywords]
-
-                if langs_in_github:
-                    percent = int((len(matched) / len(langs_in_github)) * 100)
-                else:
-                    percent = 0
-
-                st.metric(label="Alignment (%)", value=f"{percent}%")
-                st.write(f"✅ **Matched Skills:** {', '.join(matched) if matched else 'None'}")
-                st.write(f"❌ **Missing from Resume:** {', '.join(missing) if missing else 'None'}")
-
-                st.markdown("#### 💻 Top GitHub Languages")
-                for lang, count in github_langs.items():
-                    st.write(f"- {lang}: {count:,} lines of code")
-
-                # combined resume & portfolio visualization
-                st.markdown("---")
-                st.subheader("📊 Resume & Portfolio Combined Visualization")
-
-                try:
-                    col1, col2 = st.columns(2)
-
-                    # resume skill distribution (pie chart)
-                    with col1:
-                        st.markdown("#### Resume Skill Distribution")
-                        from nlp_analysis import get_skill_frequencies
-                        resume_skill_df = get_skill_frequencies(resume_text)
-                        if not resume_skill_df.empty:
-                            fig1, ax1 = plt.subplots()
-                            ax1.pie(
-                                resume_skill_df["Count"],
-                                labels=resume_skill_df["Skill"],
-                                autopct="%1.1f%%",
-                                startangle=90
-                            )
-                            ax1.axis("equal")
-                            st.pyplot(fig1)
-                        else:
-                            st.info("No skills found in resume for visualization.")
-
-                    # gitHub language distribution (bar chart)
-                    with col2:
-                        st.markdown("#### GitHub Language Distribution")
-                        if github_langs:
-                            fig2, ax2 = plt.subplots()
-                            langs = list(github_langs.keys())
-                            lines = list(github_langs.values())
-                            ax2.bar(langs, lines)
-                            ax2.set_xlabel("Languages")
-                            ax2.set_ylabel("Lines of Code")
-                            ax2.set_title("GitHub Language Distribution")
-                            plt.xticks(rotation=45)
-                            st.pyplot(fig2)
-                        else:
-                            st.info("No GitHub languages available for visualization.")
-
-                    st.success(
-                        "✅ Insight: The closer the resume skill ratio matches GitHub language ratio, "
-                        "the stronger your profile alignment.")
-
-                except Exception as e:
-                    st.warning(f"Could not generate combined visualization: {e}")
-
-                # top github language vs resume focus
-                st.markdown("### 📊 GitHub Language vs Resume Focus")
-
-                try:
-                    top_lang = max(github_langs, key=github_langs.get)
-
-                    # most frequent skill from resume
-                    from nlp_analysis import get_top_skills
-                    resume_top_skills = get_top_skills(resume_text, top_n=1)
-                    resume_focus = resume_top_skills[0] if resume_top_skills else "Unknown"
-
-                    st.write(f"**🏆 Top GitHub Language:** {top_lang}")
-                    st.write(f"**🧠 Resume Focus Area:** {resume_focus}")
-
-                    if top_lang.lower() == resume_focus.lower():
-                        st.success("Perfect alignment — your GitHub projects reflect your resume focus! 🎯")
-                    else:
-                        st.info("Partial alignment — consider adding GitHub projects related to your resume focus.")
-                except Exception as e:
-                    st.warning(f"Could not analyze GitHub vs Resume focus: {e}")
-
-            else:
-                st.info("Upload your resume and enter your GitHub username to view alignment insights.")
-
-        except Exception as e:
-            st.warning(f"Could not compute Resume ↔ GitHub alignment: {e}")
-
-        already_saved = st.session_state.get("last_saved_profile")
-        if already_saved != data["username"]:
-            try:
-                save_analysis(
-                    username=data["username"],
-                    role=st.session_state.get("role", "N/A"),
-                    ats_score=st.session_state.get("ats_score", 0),
-                    repos=data["repositories"],
-                    followers=data["followers"],
-                    contributions=data["contributions"]
-                )
-                st.session_state["last_saved_profile"] = data["username"]
-            except sqlite3.OperationalError as exc:
-                st.error(f"Database error while saving analysis: {exc}")
-            except Exception as exc:
-                st.warning(f"⚠️ Could not save data: {exc}")
+        if "error" in data:
+            st.error(data["error"])
         else:
-            st.info("Profile data already saved in this session (to avoid duplicates).")
+            st.success(f"✅ GitHub data fetched for **{data['username']}**")
+            st.session_state["portfolio_data"] = data
 
-        if st.button("📄 Export combined PDF report"):
-            with st.spinner("Generating PDF..."):
-                from nlp_analysis import get_skill_frequencies
+            # small stats row
+            subcol1, subcol2, subcol3 = st.columns(3)
+            subcol1.metric("🧰 Repositories", data["repositories"])
+            subcol2.metric("👥 Followers", data["followers"])
+            subcol3.metric("🔥 Contributions", data["contributions"])
 
-                resume_skill_df = get_skill_frequencies(st.session_state.get("resume_text", ""))
-                filename = generate_pdf_report(
-                    role=st.session_state.get("role", "N/A"),
-                    result=st.session_state.get("result", {"found": [], "missing": []}),
-                    feedback=st.session_state.get("feedback", []),
-                    ats_score=st.session_state.get("ats_score", 0),
-                    portfolio_data=data,
-                    resume_skill_df=resume_skill_df)
+            display_portfolio_feedback(data.get("feedback", data.get("feedback_text", [])))
 
-            st.success("✅ PDF report generated successfully!")
-            with open(filename, "rb") as pdf_file:
-                st.download_button("⬇️ Download Report", data=pdf_file, file_name=filename, mime="application/pdf")
+            # resume ↔ gitHub skill alignment
+            st.markdown("---")
+            st.subheader("🤝 Resume ↔ GitHub Skill Alignment")
 
-        # progress history
-        st.markdown("---")
-        st.subheader("📈 Progress History")
+            try:
+                resume_text = st.session_state.get("resume_text", "")
+                github_langs = data.get("top_languages", {})
+
+                if resume_text and github_langs:
+                    langs_in_github = [lang.lower() for lang in github_langs.keys()]
+
+                    resume_keywords = extract_keywords(resume_text, top_n=50)
+                    resume_keywords = [k.lower() for k in resume_keywords]
+
+                    matched = [lang for lang in langs_in_github if lang in resume_keywords]
+                    missing = [lang for lang in langs_in_github if lang not in resume_keywords]
+
+                    align_percent = int((len(matched) / len(langs_in_github)) * 100) if langs_in_github else 0
+
+                    col_r4.metric("Alignment (%)", f"{align_percent}%")
+
+                    st.metric(label="Alignment (%)", value=f"{align_percent}%")
+                    st.write(f"✅ **Matched Skills:** {', '.join(matched) if matched else 'None'}")
+                    st.write(f"❌ **Missing from Resume:** {', '.join(missing) if missing else 'None'}")
+
+                    st.markdown("#### 💻 Top GitHub Languages")
+                    for lang, count in github_langs.items():
+                        st.write(f"- {lang}: {count:,} lines of code")
+
+                    # combined resume & portfolio visualization
+                    st.markdown("---")
+                    st.subheader("📊 Resume & Portfolio Combined Visualization")
+                    try:
+                        col1, col2 = st.columns(2)
+                        # resume skill distribution (pie chart)
+                        with col1:
+                            st.markdown("#### Resume Skill Distribution")
+                            from nlp_analysis import get_skill_frequencies
+
+                            resume_skill_df = get_skill_frequencies(resume_text)
+                            if not resume_skill_df.empty:
+                                fig1, ax1 = plt.subplots()
+                                ax1.pie(
+                                    resume_skill_df["Count"],
+                                    labels=resume_skill_df["Skill"],
+                                    autopct="%1.1f%%",
+                                    startangle=90
+                                )
+                                ax1.axis("equal")
+                                st.pyplot(fig1)
+                            else:
+                                st.info("No skills found in resume for visualization.")
+
+                        # gitHub language distribution (bar chart)
+                        with col2:
+                            st.markdown("#### GitHub Language Distribution")
+                            if github_langs:
+                                fig2, ax2 = plt.subplots()
+                                langs = list(github_langs.keys())
+                                lines = list(github_langs.values())
+                                ax2.bar(langs, lines)
+                                ax2.set_xlabel("Languages")
+                                ax2.set_ylabel("Lines of Code")
+                                ax2.set_title("GitHub Language Distribution")
+                                plt.xticks(rotation=45)
+                                st.pyplot(fig2)
+                            else:
+                                st.info("No GitHub languages available for visualization.")
+
+                        st.success(
+                            "✅ Insight: The closer the resume skill ratio matches GitHub language ratio, "
+                            "the stronger your profile alignment.")
+
+                    except Exception as e:
+                        st.warning(f"Could not generate combined visualization: {e}")
+
+                    # top github language vs resume focus
+                    st.markdown("### 📊 GitHub Language vs Resume Focus")
+                    try:
+                        top_lang = max(github_langs, key=github_langs.get)
+                        resume_top_skills = get_top_skills(resume_text, top_n=1)
+                        resume_focus = resume_top_skills[0] if resume_top_skills else "Unknown"
+
+                        st.write(f"**🏆 Top GitHub Language:** {top_lang}")
+                        st.write(f"**🧠 Resume Focus Area:** {resume_focus}")
+
+                        if top_lang.lower() == resume_focus.lower():
+                            st.success("Perfect alignment — your GitHub projects reflect your resume focus! 🎯")
+                        else:
+                            st.info("Partial alignment — consider adding GitHub projects related to your resume focus.")
+                    except Exception as e:
+                        st.warning(f"Could not analyze GitHub vs Resume focus: {e}")
+
+                else:
+                    st.info("Upload your resume and enter your GitHub username to view alignment insights.")
+
+            except Exception as e:
+                st.warning(f"Could not compute Resume ↔ GitHub alignment: {e}")
+
+            already_saved = st.session_state.get("last_saved_profile")
+            if already_saved != data["username"]:
+                try:
+                    save_analysis(
+                        username=data["username"],
+                        role=st.session_state.get("role", "N/A"),
+                        ats_score=st.session_state.get("ats_score", 0),
+                        repos=data["repositories"],
+                        followers=data["followers"],
+                        contributions=data["contributions"]
+                    )
+                    st.session_state["last_saved_profile"] = data["username"]
+                except sqlite3.OperationalError as exc:
+                    st.error(f"Database error while saving analysis: {exc}")
+                except Exception as exc:
+                    st.warning(f"⚠️ Could not save data: {exc}")
+            else:
+                st.info("Profile data already saved in this session (to avoid duplicates).")
+
+            # export pdf
+            if st.button("📄 Export combined PDF report"):
+                with st.spinner("Generating PDF..."):
+                    try:
+                        from nlp_analysis import get_skill_frequencies
+
+                        resume_skill_df = get_skill_frequencies(st.session_state.get("resume_text", ""))
+                        filename = generate_pdf_report(
+                            role=st.session_state.get("role", "N/A"),
+                            result=st.session_state.get("result", {"found": [], "missing": []}),
+                            feedback=st.session_state.get("feedback", []),
+                            ats_score=st.session_state.get("ats_score", 0),
+                            portfolio_data=data,
+                            resume_skill_df=resume_skill_df)
+
+                        st.success("✅ PDF report generated successfully!")
+                        with open(filename, "rb") as pdf_file:
+                            st.download_button("⬇️ Download Report", data=pdf_file, file_name=filename, mime="application/pdf")
+                    except Exception as e:
+                        st.error(f"Could not generate PDF: {e}")
+
+# progress history
+with tab_progress:
+    st.header("📈 Progress History")
+    st.write("Track your ATS score history and improvements over time.")
+    username_for_history = st.text_input("History: Enter GitHub username to view progress", value="")
+
+    if username_for_history:
         try:
-            history = get_user_history(username)
+            history = get_user_history(username_for_history)
         except sqlite3.OperationalError as exc:
             st.error(f"Database error while fetching history: {exc}")
             history = []
@@ -352,13 +361,12 @@ if username:
         if history:
             df = pd.DataFrame(history, columns=["Role", "ATS Score", "Repositories", "Followers", "Contributions", "Points", "Date"])
             st.dataframe(df)
-
             st.markdown("#### ATS Score Trend")
-            fig, ax = plt.subplots(figsize=(6, 4))
             try:
                 df["Date"] = pd.to_datetime(df["Date"])
             except Exception:
                 pass
+            fig, ax = plt.subplots(figsize=(6, 4))
             ax.plot(df["Date"], df["ATS Score"], marker="o", linestyle="-", color="royalblue", linewidth=2)
             ax.set_xlabel("Date")
             ax.set_ylabel("ATS Score")
@@ -369,28 +377,34 @@ if username:
         else:
             st.info("No progress history yet — analyze a resume to start tracking your growth!")
 
-        # leaderboard
-        st.markdown("---")
-        st.header("🏆 Leaderboard")
-        try:
-            leaderboard = get_leaderboard()
-        except Exception as exc:
-            st.error(f"Could not load leaderboard: {exc}")
-            leaderboard = []
-
-        if leaderboard:
-            leaderboard_df = pd.DataFrame(leaderboard, columns=["Username", "Avg ATS Score", "Total Contributions", "Total Points"])
-            leaderboard_df.index = leaderboard_df.index + 1
-            st.dataframe(leaderboard_df)
+    # clear history
+    st.markdown("---")
+    st.subheader("🧹 Manage Your Data")
+    if st.button("Clear My History"):
+        if username_for_history:
+            try:
+                conn = sqlite3.connect("analysis_history.db")
+                c = conn.cursor()
+                c.execute("DELETE FROM history WHERE username=?", (username_for_history,))
+                conn.commit()
+                conn.close()
+                st.success("✅ History cleared successfully!")
+            except Exception as e:
+                st.error(f"Could not clear history: {e}")
         else:
-            st.info("No leaderboard data yet!")
-        st.markdown("---")
-        st.subheader("🧹 Manage Your Data")
-        if st.button("Clear My History"):
-            conn = sqlite3.connect("analysis_history.db")
-            c = conn.cursor()
-            c.execute("DELETE FROM history WHERE username=?", (username,))
-            conn.commit()
-            conn.close()
-            st.session_state["last_saved_profile"] = None
-            st.success("✅ History cleared successfully!")
+            st.warning("Enter the username above to clear that user's history.")
+
+# leaderboard
+with tab_leaderboard:
+    st.header("🏆 Leaderboard")
+    try:
+        leaderboard = get_leaderboard()
+    except Exception as exc:
+        st.error(f"Could not load leaderboard: {exc}")
+        leaderboard = []
+    if leaderboard:
+        leaderboard_df = pd.DataFrame(leaderboard, columns=["Username", "Avg ATS Score", "Total Contributions", "Total Points"])
+        leaderboard_df.index = leaderboard_df.index + 1
+        st.dataframe(leaderboard_df)
+    else:
+        st.info("No leaderboard data yet!")
