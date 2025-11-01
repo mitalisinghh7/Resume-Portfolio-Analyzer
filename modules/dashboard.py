@@ -35,6 +35,9 @@ tab_resume, tab_portfolio, tab_progress, tab_leaderboard = st.tabs(
 # resume uploader & analysis
 with tab_resume:
     st.header("📄 Resume Analyzer")
+    st.write("Upload your resume (PDF/DOCX) and explore keyword matches, ATS score, and NLP-based insights.")
+
+    st.markdown("### 📤 Upload Section")
     uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
     resume_text = ""
 
@@ -49,124 +52,129 @@ with tab_resume:
 
         if resume_text:
             st.session_state["resume_text"] = resume_text
-            display_resume_preview(resume_text)
 
+            # preview
+            with st.expander("📝 Resume Preview", expanded=False):
+                display_resume_preview(resume_text)
+
+            # job role selection
             job_roles = load_job_roles()
             if job_roles:
+                st.markdown("### 🎯 Select Target Role")
                 role, keywords = select_job_role(job_roles)
                 st.session_state["role"] = role
-                st.write(f"📌 Selected Role: **{role}**")
+                st.info(f"📌 Selected Role: **{role}**")
 
                 # keyword analysis
-                result = analyze_keywords(resume_text, keywords)
-                st.session_state["result"] = result
-                display_keyword_analysis(result)
+                with st.expander("🔍 Keyword Analysis", expanded=True):
+                    result = analyze_keywords(resume_text, keywords)
+                    st.session_state["result"] = result
+                    display_keyword_analysis(result)
 
-                found = result.get("found", [])
-                missing = result.get("missing", [])
-                feedback = generate_feedback(found, missing)
-                st.session_state["feedback"] = feedback
-                display_feedback(feedback)
-
-                show_summary(result)
+                # feedback
+                with st.expander("💡 Feedback & Recommendations", expanded=True):
+                    found = result.get("found", [])
+                    missing = result.get("missing", [])
+                    feedback = generate_feedback(found, missing)
+                    st.session_state["feedback"] = feedback
+                    display_feedback(feedback)
+                    show_summary(result)
 
                 # ats score
-                try:
-                    ats_score = calculate_ats_score(resume_text, role)
-                    st.session_state["ats_score"] = ats_score
-                    st.subheader("📊 ATS Score")
-                    st.progress(int(ats_score))
-                    st.write(f"⭐ Your resume scored **{ats_score}/100** for the role: **{role}**")
-                except Exception as e:
-                    st.error(f"Could not compute ATS score: {e}")
+                with st.expander("📊 ATS Score Simulation", expanded=True):
+                    try:
+                        ats_score = calculate_ats_score(resume_text, role)
+                        st.session_state["ats_score"] = ats_score
+                        st.progress(int(ats_score))
+                        st.metric(label="ATS Score", value=f"{ats_score}/100")
+                        st.caption(f"Score for role: **{role}**")
+                    except Exception as e:
+                        st.error(f"Could not compute ATS score: {e}")
 
                 # nlp insights
-                st.markdown("---")
-                st.subheader("🧠 NLP Insights")
-                try:
-                    top_keywords = extract_keywords(resume_text, top_n=40)
-                    if top_keywords:
-                        st.write("**Top keywords (by frequency):**", ", ".join(top_keywords[:20]))
-                    else:
-                        st.info("No prominent keywords found.")
-                except Exception as e:
-                    st.warning(f"Keyword extraction failed: {e}")
+                with st.expander("🧠 NLP Insights", expanded=False):
+                    try:
+                        top_keywords = extract_keywords(resume_text, top_n=40)
+                        if top_keywords:
+                            st.write("**Top keywords (by frequency):**", ", ".join(top_keywords[:20]))
+                        else:
+                            st.info("No prominent keywords found.")
+                    except Exception as e:
+                        st.warning(f"Keyword extraction failed: {e}")
 
                 # wordcloud
-                wc_bytes = None
-                try:
-                    wc_bytes = generate_wordcloud_bytes(resume_text)
-                except Exception:
+                with st.expander("🌥️ WordCloud Visualization", expanded=False):
                     wc_bytes = None
-
-                if wc_bytes:
-                    show_wordcloud(wc_bytes, title="🌥️ Resume WordCloud")
-                else:
-                    st.info("WordCloud unavailable (install 'wordcloud' package to enable).")
+                    try:
+                        wc_bytes = generate_wordcloud_bytes(resume_text)
+                    except Exception:
+                        wc_bytes = None
+                    if wc_bytes:
+                        show_wordcloud(wc_bytes, title="Resume WordCloud")
+                    else:
+                        st.info("WordCloud unavailable (install 'wordcloud' package to enable).")
 
                 # top 5 skills
-                st.markdown("---")
-                st.subheader("📊 Top 5 Most Frequent Skills")
-                try:
-                    top_skills = get_top_skills(resume_text, top_n=5)
-                    if top_skills:
-                        st.write(", ".join([s.capitalize() for s in top_skills]))
-                    else:
-                        st.info("No top skills found.")
-                except Exception as e:
-                    st.warning(f"Top skills extraction failed: {e}")
+                with st.expander("💪 Top 5 Most Frequent Skills", expanded=False):
+                    try:
+                        top_skills = get_top_skills(resume_text, top_n=5)
+                        if top_skills:
+                            st.write(", ".join([s.capitalize() for s in top_skills]))
+                        else:
+                            st.info("No top skills found.")
+                    except Exception as e:
+                        st.warning(f"Top skills extraction failed: {e}")
 
                 # skill frequency table and chart
-                st.markdown("---")
-                st.subheader("💪 Skill Frequency Strength")
-                try:
-                    skill_df = get_skill_frequencies(resume_text)
-                    if not skill_df.empty:
-                        st.dataframe(skill_df)
-                        fig, ax = plt.subplots(figsize=(6, 4))
-                        ax.barh(skill_df["Skill"], skill_df["Count"])
-                        ax.invert_yaxis()
-                        ax.set_xlabel("Frequency")
-                        ax.set_ylabel("Skill")
-                        ax.set_title("Skill Strength in Resume")
-                        st.pyplot(fig)
-                    else:
-                        st.info("No technical skills detected for frequency analysis.")
-                except Exception as e:
-                    st.warning(f"Skill frequency analysis failed: {e}")
+                with st.expander("📈 Skill Frequency Strength", expanded=False):
+                    try:
+                        skill_df = get_skill_frequencies(resume_text)
+                        if not skill_df.empty:
+                            st.dataframe(skill_df, use_container_width=True)
+                            fig, ax = plt.subplots(figsize=(6, 4))
+                            ax.barh(skill_df["Skill"], skill_df["Count"])
+                            ax.invert_yaxis()
+                            ax.set_xlabel("Frequency")
+                            ax.set_ylabel("Skill")
+                            ax.set_title("Skill Strength in Resume")
+                            st.pyplot(fig)
+                        else:
+                            st.info("No technical skills detected for frequency analysis.")
+                    except Exception as e:
+                        st.warning(f"Skill frequency analysis failed: {e}")
 
                 # skill match %
-                st.markdown("---")
-                st.subheader("🔗 Skill Match Percentage")
-                try:
-                    percent, matched_count, total_required, matched_list = calculate_skill_match_percentage(resume_text, keywords)
-                    st.metric(label="Match (%)", value=f"{percent}%")
-                    st.progress(int(percent))
-                    st.write(f"Matched {matched_count} out of {total_required} required keywords for **{role}**.")
-                    if matched_list:
-                        st.write("Matched keywords:", ", ".join(matched_list))
-                    else:
-                        st.info("No required keywords were matched in the resume.")
+                with st.expander("🔗 Skill Match Percentage", expanded=True):
+                    try:
+                        percent, matched_count, total_required, matched_list = calculate_skill_match_percentage(resume_text, keywords)
+                        st.metric(label="Match (%)", value=f"{percent}%")
+                        st.progress(int(percent))
+                        st.write(f"Matched {matched_count} out of {total_required} required keywords for **{role}**.")
 
-                    # combined insights
-                    from ui_helpers import display_resume_insights
-                    from nlp_analysis import calculate_skill_coverage
+                        if matched_list:
+                            st.write("Matched keywords:", ", ".join(matched_list))
+                        else:
+                            st.info("No required keywords were matched in the resume.")
 
-                    display_resume_insights(
-                        match_percent=percent,
-                        ats_score=st.session_state.get("ats_score", 0),
-                        role=role,
-                        missing_keywords=result.get("missing", [])
-                    )
+                        # combined insights
+                        from ui_helpers import display_resume_insights
+                        from nlp_analysis import calculate_skill_coverage
 
-                    st.markdown("### 📋 Skill Coverage Summary")
-                    found_count, missing_count, coverage = calculate_skill_coverage(resume_text, keywords)
-                    st.write(f"- ✅ Found Skills: {found_count}")
-                    st.write(f"- ❌ Missing Skills: {missing_count}")
-                    st.write(f"- 📊 Coverage: {coverage}%")
+                        display_resume_insights(
+                            match_percent=percent,
+                            ats_score=st.session_state.get("ats_score", 0),
+                            role=role,
+                            missing_keywords=result.get("missing", [])
+                        )
 
-                except Exception as e:
-                    st.warning(f"Could not compute skill match or insights: {e}")
+                        st.markdown("### 📋 Skill Coverage Summary")
+                        found_count, missing_count, coverage = calculate_skill_coverage(resume_text, keywords)
+                        st.write(f"- ✅ Found Skills: {found_count}")
+                        st.write(f"- ❌ Missing Skills: {missing_count}")
+                        st.write(f"- 📊 Coverage: {coverage}%")
+
+                    except Exception as e:
+                        st.warning(f"Could not compute skill match or insights: {e}")
 
 # portfolio analyzer
 with tab_portfolio:
