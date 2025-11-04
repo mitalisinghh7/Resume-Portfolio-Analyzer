@@ -19,6 +19,39 @@ try:
 except Exception:
     pass
 
+def generate_ai_summary(role, ats_score, found_skills, missing_skills, portfolio_data):
+    try:
+        # github top language
+        top_lang = None
+        if portfolio_data and "top_languages" in portfolio_data and portfolio_data["top_languages"]:
+            top_lang = max(portfolio_data["top_languages"], key=portfolio_data["top_languages"].get)
+
+        summary = "💬 “Your resume demonstrates "
+        if found_skills:
+            summary += f"strong proficiency in {', '.join(found_skills[:2])}"
+        else:
+            summary += "a growing skill foundation"
+
+        if top_lang:
+            summary += f", complemented by consistent GitHub activity in {top_lang} development"
+        summary += "."
+
+        summary += f" With an ATS score of {ats_score}, "
+        if ats_score >= 75:
+            summary += "your profile shows strong alignment with the role"
+        elif ats_score >= 50:
+            summary += "you’re moderately aligned, with potential to improve further"
+        else:
+            summary += "there’s room for better keyword optimization"
+
+        if missing_skills:
+            summary += f". Consider strengthening skills in {', '.join(missing_skills[:2])}"
+        summary += ". Overall, your profile reflects solid technical depth and practical exposure.”"
+
+        return summary
+    except Exception:
+        return "💬 “Unable to generate personalized summary insight.”"
+
 st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 st.title("🎓 Resume & Portfolio Analyzer")
 st.write("Welcome! Upload your resume to get started.")
@@ -29,8 +62,7 @@ for k in ["resume_text", "role", "result", "feedback", "ats_score", "last_saved_
 
 # layout of tabs
 tab_resume, tab_portfolio, tab_progress, tab_leaderboard = st.tabs(
-    ["📄 Resume", "🌐 Portfolio", "📈 Progress", "🏆 Leaderboard"]
-)
+    ["📄 Resume", "🌐 Portfolio", "📈 Progress", "🏆 Leaderboard"])
 
 # resume uploader & analysis
 with tab_resume:
@@ -293,6 +325,30 @@ with tab_portfolio:
                             st.success("Perfect alignment — your GitHub projects reflect your resume focus! 🎯")
                         else:
                             st.info("Partial alignment — consider adding GitHub projects related to your resume focus.")
+
+                            # ai summary insight
+                            st.markdown("---")
+                            st.subheader("🧠 AI Summary Insight")
+
+                            try:
+                                role = st.session_state.get("role", "N/A")
+                                ats_score = st.session_state.get("ats_score", 0)
+                                result = st.session_state.get("result", {"found": [], "missing": []})
+                                portfolio_data = st.session_state.get("portfolio_data", {})
+
+                                summary_text = generate_ai_summary(
+                                    role=role,
+                                    ats_score=ats_score,
+                                    found_skills=result.get("found", []),
+                                    missing_skills=result.get("missing", []),
+                                    portfolio_data=portfolio_data)
+
+                                st.markdown(
+                                    f"<p style='font-size:17px; color:#E0E0E0; background-color:#262730; padding:12px; border-radius:10px;'>{summary_text}</p>",
+                                    unsafe_allow_html=True)
+                            except Exception as e:
+                                st.warning(f"Could not generate AI summary: {e}")
+
                     except Exception as e:
                         st.warning(f"Could not analyze GitHub vs Resume focus: {e}")
 
