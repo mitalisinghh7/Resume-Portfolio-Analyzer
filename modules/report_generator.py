@@ -60,9 +60,28 @@ def generate_pdf_report(role, result, feedback, ats_score, portfolio_data=None, 
     content = []
 
     # header
-    content.append(Paragraph("Resume & Portfolio Analyzer Report", title_style))
+    report_date = datetime.now().strftime("%B %d, %Y")
+    title_para = Paragraph("Resume & Portfolio Analyzer Report", title_style)
+    date_para = Paragraph(f"<font size=10 color='#555555'>{report_date}</font>", normal)
+
+    header_table = Table(
+        [[title_para, date_para]],
+        colWidths=[400, 120],
+        hAlign="LEFT"
+    )
+    header_table.setStyle(
+        TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("ALIGN", (0, 0), (0, 0), "LEFT"),
+            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0)
+        ])
+    )
+
+    content.append(header_table)
     content.append(HRFlowable(width="100%", thickness=1, color=colors.lightgrey))
     content.append(Spacer(1, 10))
+
     content.append(Paragraph(f"<b>Selected Role:</b> {role}", normal))
     content.append(Spacer(1, 8))
 
@@ -182,9 +201,7 @@ def generate_pdf_report(role, result, feedback, ats_score, portfolio_data=None, 
                 plt.ylabel("Lines of Code", fontsize=9)
                 plt.title("GitHub Language Distribution", fontsize=10)
                 plt.xticks(rotation=45, fontsize=8)
-
                 plt.ticklabel_format(style='plain', axis='y')
-
                 plt.tight_layout()
                 plt.savefig(bar_path, dpi=150)
                 plt.close()
