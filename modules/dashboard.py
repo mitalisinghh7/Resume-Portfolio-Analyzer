@@ -8,6 +8,7 @@ from report_generator import generate_pdf_report
 from portfolio_analyzer import analyze_github_profile
 from storage_manager import (init_db, save_analysis, get_user_history, get_leaderboard, recalc_all_points)
 from nlp_analysis import extract_keywords, generate_wordcloud_bytes, get_top_skills, get_skill_frequencies, calculate_skill_match_percentage
+from analysis_history_manager import update_last_analysis, get_last_analysis
 import pandas as pd
 import matplotlib.pyplot as plt
 import sqlite3
@@ -218,6 +219,10 @@ with tab_portfolio:
         st.metric("Alignment (%)", "N/A")
 
     if username:
+        # show last analyzed time
+        last_time = get_last_analysis(username)
+        st.info(f"🕒 Last analyzed on: **{last_time}**")
+
         with st.spinner("Fetching GitHub data..."):
             data = analyze_github_profile(username)
 
@@ -225,6 +230,9 @@ with tab_portfolio:
             st.error(data["error"])
         else:
             st.success(f"✅ GitHub data fetched for **{data['username']}**")
+
+            update_last_analysis(username)
+
             st.session_state["portfolio_data"] = data
 
             # small stats row
@@ -358,6 +366,7 @@ with tab_portfolio:
             except Exception as e:
                 st.warning(f"Could not compute Resume ↔ GitHub alignment: {e}")
 
+            # save analysis
             already_saved = st.session_state.get("last_saved_profile")
             if already_saved != data["username"]:
                 try:
