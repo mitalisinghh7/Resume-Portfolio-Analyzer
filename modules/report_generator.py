@@ -61,27 +61,39 @@ def generate_pdf_report(role, result, feedback, ats_score, portfolio_data=None, 
 
     # header
     report_date = datetime.now().strftime("%B %d, %Y")
+
+    title_style = ParagraphStyle(
+        "TitleStyle",
+        parent=styles["Heading1"],
+        fontSize=19,
+        leading=24,
+        textColor=colors.HexColor("#0A3D62"),
+        leftIndent=-6,
+        spaceAfter=0)
+
     title_para = Paragraph("Resume & Portfolio Analyzer Report", title_style)
-    date_para = Paragraph(f"<font size=10 color='#555555'>{report_date}</font>", normal)
+    date_para = Paragraph(
+        f"<para align=right><font size=10 color='#555555'>{report_date}</font></para>",
+        normal)
 
     header_table = Table(
         [[title_para, date_para]],
-        colWidths=[400, 120],
-        hAlign="LEFT"
-    )
-    header_table.setStyle(
-        TableStyle([
-            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("ALIGN", (0, 0), (0, 0), "LEFT"),
-            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 0)
-        ])
-    )
+        colWidths=[400, 100],
+        hAlign="LEFT")
+
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4)
+    ]))
 
     content.append(header_table)
-    content.append(HRFlowable(width="100%", thickness=1, color=colors.lightgrey))
-    content.append(Spacer(1, 10))
 
+    # spacing
+    content.append(Spacer(1, 6))
+    content.append(HRFlowable(width="100%", color=colors.HexColor("#CCCCCC"), thickness=1))
+    content.append(Spacer(1, 12))
+
+    # select role
     content.append(Paragraph(f"<b>Selected Role:</b> {role}", normal))
     content.append(Spacer(1, 8))
 
