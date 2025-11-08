@@ -80,8 +80,7 @@ def display_portfolio_feedback(feedback):
         st.markdown(f"- {line}")
 
 # wordcloud
-def show_wordcloud(image_bytes: bytes = None, title: str = "🖼️ Word Cloud (resume strengths)"):
-    st.subheader(title)
+def show_wordcloud(image_bytes: bytes = None, title: str = None):
     if image_bytes:
         try:
             st.image(image_bytes, use_container_width=True)
