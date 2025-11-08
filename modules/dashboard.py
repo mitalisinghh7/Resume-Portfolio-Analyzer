@@ -228,7 +228,14 @@ with tab_portfolio:
     if username:
         # show last analyzed time
         last_time = get_last_analysis(username)
-        st.info(f"🕒 Last analyzed on: **{last_time}**")
+        if last_time:
+            st.markdown(
+                f"<p style='font-size:14px; color:grey;'>🕒 Last analyzed on: <b>{last_time}</b></p>",
+                unsafe_allow_html=True)
+        else:
+            st.markdown(
+                "<p style='font-size:14px; color:grey;'>🕒 No previous analysis found.</p>",
+                unsafe_allow_html=True)
 
         with st.spinner("Fetching GitHub data..."):
             data = analyze_github_profile(username)
