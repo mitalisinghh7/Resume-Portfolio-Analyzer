@@ -57,6 +57,7 @@ st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
 st.title("🎓 Resume & Portfolio Analyzer")
 st.write("Welcome! Upload your resume to get started.")
 
+# initialize
 for k in ["resume_text", "role", "result", "feedback", "ats_score", "last_saved_profile", "portfolio_data"]:
     if k not in st.session_state:
         st.session_state[k] = None
@@ -84,6 +85,7 @@ with tab_resume:
             st.session_state["resume_text"] = resume_text
             display_resume_preview(resume_text)
 
+            st.markdown("---")
             job_roles = load_job_roles()
             if job_roles:
                 role, keywords = select_job_role(job_roles)
@@ -91,6 +93,7 @@ with tab_resume:
                 st.write(f"📌 Selected Role: **{role}**")
 
                 # keyword analysis
+                st.markdown("---")
                 result = analyze_keywords(resume_text, keywords)
                 st.session_state["result"] = result
                 display_keyword_analysis(result)
@@ -99,15 +102,17 @@ with tab_resume:
                 missing = result.get("missing", [])
                 feedback = generate_feedback(found, missing)
                 st.session_state["feedback"] = feedback
-                display_feedback(feedback)
 
+                st.markdown("---")
+                display_feedback(feedback)
                 show_summary(result)
 
                 # ats score
+                st.markdown("---")
+                st.subheader("📊 ATS Score")
                 try:
                     ats_score = calculate_ats_score(resume_text, role)
                     st.session_state["ats_score"] = ats_score
-                    st.subheader("📊 ATS Score")
                     st.progress(int(ats_score))
                     st.write(f"⭐ Your resume scored **{ats_score}/100** for the role: **{role}**")
                 except Exception as e:
@@ -126,6 +131,8 @@ with tab_resume:
                     st.warning(f"Keyword extraction failed: {e}")
 
                 # wordcloud
+                st.markdown("---")
+                st.subheader("🌥️ Resume WordCloud")
                 wc_bytes = None
                 try:
                     wc_bytes = generate_wordcloud_bytes(resume_text)
@@ -133,7 +140,7 @@ with tab_resume:
                     wc_bytes = None
 
                 if wc_bytes:
-                    show_wordcloud(wc_bytes, title="🌥️ Resume WordCloud")
+                    show_wordcloud(wc_bytes)
                 else:
                     st.info("WordCloud unavailable (install 'wordcloud' package to enable).")
 
