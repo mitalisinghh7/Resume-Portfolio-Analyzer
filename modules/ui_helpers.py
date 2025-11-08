@@ -64,6 +64,7 @@ def show_summary(result: dict):
 
 # portfolio ui
 def display_portfolio_feedback(feedback):
+    st.markdown("---")
     st.subheader("💬 Portfolio Feedback")
     if not feedback:
         st.info("No portfolio feedback available.")
@@ -128,14 +129,14 @@ def show_combined_visualization(resume_skills: dict, github_langs: dict):
 
     with col1:
         st.subheader("Resume Skill Distribution")
-        fig1, ax1 = plt.subplots(figsize=(4, 4))
+        fig1, ax1 = plt.subplots(figsize=(4.5, 4.5))
         ax1.pie(resume_skills.values(), labels=resume_skills.keys(), autopct='%1.1f%%', startangle=140)
         ax1.axis("equal")
         st.pyplot(fig1)
 
     with col2:
         st.subheader("GitHub Language Distribution")
-        fig2, ax2 = plt.subplots(figsize=(4, 4))
+        fig2, ax2 = plt.subplots(figsize=(4.5, 4.5))
         ax2.bar(github_langs.keys(), github_langs.values())
         ax2.set_xlabel("Languages")
         ax2.set_ylabel("Lines of Code")
