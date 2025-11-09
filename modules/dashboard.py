@@ -53,7 +53,9 @@ def generate_ai_summary(role, ats_score, found_skills, missing_skills, portfolio
     except Exception:
         return "💬 “Unable to generate personalized summary insight.”"
 
-st.set_page_config(page_title="Resume & Portfolio Analyzer", layout="wide")
+st.set_page_config(
+    page_title="Resume & Portfolio Analyzer",
+    page_icon="modules/assets/favicon.png", layout="wide")
 st.title("🎓 Resume & Portfolio Analyzer")
 st.write("Welcome! Upload your resume to get started.")
 
