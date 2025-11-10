@@ -1,25 +1,36 @@
 # 🎓 Resume & Portfolio Analyzer  
 
-This project is part of my participation in the **#Codeunia60DaysOfCode** challenge. I’ll be building and improving it step by step over the next 60 days.  
+This project is part of my participation in the **#Codeunia60DaysOfCode** challenge.  
+It has been developed step by step to help students and professionals evaluate how well their **resumes** and **portfolios** represent their skills.
 
-## 📌 About the Project  
-Students and early professionals often struggle to know whether their resumes and portfolios highlight their skills effectively. This project aims to make that easier by analyzing resumes (PDF/DOCX) and portfolio links, then providing instant, actionable feedback.
+## 📌 About the Project
+Students and early professionals often struggle to understand how effective their resumes and portfolios are during job applications.  
+This tool simplifies that process by analyzing both resume content and portfolio data to provide detailed feedback.
 
-## 🚀 Planned Features
-- 📂 Resume Upload (PDF/DOCX)  
-- 🔑 Keyword Analysis (check for important tech skills)  
-- 📊 ATS Score Simulation (compare against job descriptions)  
-- 🌐 Portfolio Analysis (GitHub/LinkedIn scraping)  
-- 📝 Feedback Report with suggestions & missing sections  
-- ☁️ Word Cloud of strengths  
-- 📑 Export as PDF report    
+The analyzer evaluates:
+- Resume text (PDF/DOCX) for skills, missing keywords, and structure
+- GitHub portfolios for repositories, followers, and contributions
+- Combined insights presented through a clean Streamlit dashboard
+- A downloadable report summarizing key findings
+
+## 🚀 Features
+- Resume upload and text extraction  
+- Keyword and skill frequency analysis  
+- ATS score estimation based on job descriptions  
+- Portfolio analysis with GitHub statistics  
+- Automated feedback generation with improvement suggestions
+- Combined PDF report of resume and portfolio insights
+- Leaderboard integration for users
+- History tracking for previous analyses     
 
 ## 🛠️ Tech Stack
 - Python  
-- PyPDF2 / python-docx  
-- NLTK / spaCy for text analysis  
-- SQLite for storing feedback history  
-- Streamlit (for dashboard & reports)  
+- PyPDF2 / python-docx
+- NLTK / spaCy
+- SQLite
+- Streamlit
+- Requests / BeautifulSoup
+- ReportLab
 
 ---
 
