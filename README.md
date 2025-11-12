@@ -34,6 +34,11 @@ The analyzer evaluates:
 
 ---
 
+## 🌐 Live Demo  
+Try it out here 👉 [**Resume & Portfolio Analyzer App**](https://resume-portfolio-analyzer.streamlit.app)
+
+---
+
 ## 🚀 Challenge Participation
 This repository is created for the **#Codeunia60DaysOfCode challenge**.  
 - Daily commits will include new features, improvements, or bug fixes.  
