@@ -53,7 +53,10 @@ def display_feedback(feedback):
         lines = [str(feedback)]
 
     for line in lines:
-        st.markdown(f"- {line}")
+        if line.startswith("⚠️") or line.startswith("💡"):
+            st.markdown(line)
+        else:
+            st.markdown(f"- {line}")
 
 def show_summary(result: dict):
     st.subheader("📊 Skills Summary")
