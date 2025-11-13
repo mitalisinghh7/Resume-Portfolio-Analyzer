@@ -40,6 +40,13 @@ Try it out here 👉 [**Resume & Portfolio Analyzer App**](https://resume-portfo
 ---
 
 ## 🚀 Challenge Participation
-This repository is created for the **#Codeunia60DaysOfCode challenge**.  
-- Daily commits will include new features, improvements, or bug fixes.  
-- Progress will be shared daily on LinkedIn with the hashtag **#Codeunia60DaysOfCode**.
+This project was created as part of the **#Codeunia60DaysOfCode** challenge.  
+Over the course of 60 days, it evolved from a simple resume analyzer to a complete **Resume & Portfolio Analysis Platform**.  
+
+Throughout the challenge:
+- New features were added daily — from resume parsing and ATS scoring to GitHub portfolio insights.  
+- The interface and feedback system were refined for a smooth user experience.  
+- The app was deployed live for public access.  
+
+Progress and updates were shared daily on LinkedIn with the hashtag **#Codeunia60DaysOfCode**.  
+It’s been an incredible journey of consistent coding, learning, and building! 🚀
