@@ -109,6 +109,24 @@ with tab_resume:
                 display_feedback(feedback)
                 show_summary(result)
 
+                # Course Recommendations
+                from course_recommender import get_course_recommendations
+
+                st.markdown("---")
+                st.subheader("🎓 Recommended Learning Resources")
+
+                recommendations = get_course_recommendations(result.get("missing", []), role)
+
+                for skill, course_list in recommendations.items():
+                    st.markdown(f"### {skill}")
+
+                    for course in course_list:
+                        if course.get("link"):
+                            st.markdown(
+                                f"- **{course['title']}** ({course.get('platform', '')})\n"
+                                f"  🔗 {course['link']}"
+                            )
+
                 # ats score
                 st.markdown("---")
                 st.subheader("📊 ATS Score")
