@@ -109,7 +109,7 @@ with tab_resume:
                 show_summary(result)
 
                 # Course Recommendations
-                from modules.course_recommender import get_course_recommendations
+                from course_recommender import get_course_recommendations
 
                 st.markdown("---")
                 st.subheader("🎓 Recommended Learning Resources")
