@@ -12,7 +12,6 @@ from analysis_history_manager import update_last_analysis, get_last_analysis
 import pandas as pd
 import matplotlib.pyplot as plt
 import sqlite3
-from datetime import datetime
 
 init_db()
 try:
@@ -110,7 +109,7 @@ with tab_resume:
                 show_summary(result)
 
                 # Course Recommendations
-                from course_recommender import get_course_recommendations
+                from modules.course_recommender import get_course_recommendations
 
                 st.markdown("---")
                 st.subheader("🎓 Recommended Learning Resources")
